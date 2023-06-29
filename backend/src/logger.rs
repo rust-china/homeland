@@ -1,3 +1,5 @@
+use anyhow::Context;
+use tracing_log::LogTracer;
 use tracing_subscriber::fmt::format::Writer;
 use tracing_subscriber::{self, fmt::time::FormatTime};
 
@@ -10,19 +12,19 @@ impl FormatTime for LocalTimer {
     }
 }
 
-fn main() {
+pub fn logging() -> anyhow::Result<()> {
+    LogTracer::init().with_context(|| "setting default LogTracer failed")?;
     let format = tracing_subscriber::fmt::format()
         .with_level(true)
         .with_target(true)
         .with_timer(LocalTimer);
     let subscriber = tracing_subscriber::FmtSubscriber::builder()
-        .with_max_level(tracing::Level::TRACE)
+        .with_max_level(tracing::Level::DEBUG)
         .with_writer(std::io::stdout) // 写入标准输出
-        .with_ansi(true)  // 如果日志是写入文件，应将ansi的颜色输出功能关掉
+        .with_ansi(true) // 如果日志是写入文件，应将ansi的颜色输出功能关掉
         .event_format(format)
         .finish();
-    tracing::subscriber::set_global_default(subscriber)
-        .expect("setting default subscriber failed");
+    tracing::subscriber::set_global_default(subscriber).with_context(|| "setting default subscriber failed")?;
 
-    tracing::info!("Hello, world!");
+    Ok(())
 }

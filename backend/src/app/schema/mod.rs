@@ -15,5 +15,6 @@ pub struct AppSubscription(post::PostSubscription);
 
 pub type AppSchema = Schema<AppQuery, AppMutation, AppSubscription>;
 pub fn build_schema() -> AppSchema {
-    Schema::build(AppQuery::default(), AppMutation::default(), AppSubscription::default()).finish()
+    Schema::build(AppQuery::default(), AppMutation::default(), AppSubscription::default())
+    .finish()
 }

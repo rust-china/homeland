@@ -1,6 +1,6 @@
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse, GraphQLSubscription};
 use axum::{
-    extract::{Extension, Path, Query},
+    extract::{Extension, Path, Query, State},
     response::{Html, IntoResponse},
     routing::get,
     Router,
@@ -45,6 +45,10 @@ pub async fn get_graphiql(version: Option<Path<String>>, query: Option<Query<Pla
     ))
 }
 
-pub async fn post_graphql(Extension(schema): Extension<crate::app::schema::AppSchema>, req: GraphQLRequest) -> GraphQLResponse {
-    schema.execute(req.into_inner()).await.into()
+pub async fn post_graphql(
+    State(state): State<crate::AppState>,
+    Extension(schema): Extension<crate::app::schema::AppSchema>,
+    req: GraphQLRequest,
+) -> GraphQLResponse {
+    schema.execute(req.into_inner().data(state)).await.into()
 }

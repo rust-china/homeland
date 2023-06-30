@@ -1,2 +1,3 @@
-pub mod router;
+pub mod entity;
 pub mod schema;
+pub mod router;

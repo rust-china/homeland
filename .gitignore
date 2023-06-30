@@ -1,7 +1,8 @@
 .vscode
 .idea
 
-target
+backend/target
+backend/.env.local
 
 node_modules
 dist

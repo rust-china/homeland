@@ -1,7 +1,10 @@
 use anyhow::Context;
 use tracing_log::LogTracer;
-use tracing_subscriber::fmt::format::Writer;
-use tracing_subscriber::{self, fmt::time::FormatTime};
+use tracing_subscriber::{
+    self,
+    fmt::{format::Writer, time::FormatTime},
+    EnvFilter,
+};
 
 // 用来格式化日志的输出时间格式
 struct LocalTimer;
@@ -19,7 +22,8 @@ pub fn logging() -> anyhow::Result<()> {
         .with_target(true)
         .with_timer(LocalTimer);
     let subscriber = tracing_subscriber::FmtSubscriber::builder()
-        .with_max_level(tracing::Level::DEBUG)
+        // .with_max_level(tracing::Level::DEBUG)
+        .with_env_filter(EnvFilter::from_default_env())
         .with_writer(std::io::stdout) // 写入标准输出
         .with_ansi(true) // 如果日志是写入文件，应将ansi的颜色输出功能关掉
         .event_format(format)

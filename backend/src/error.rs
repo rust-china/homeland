@@ -9,11 +9,18 @@ pub enum Error {
     Message(String),
     // #[error("error request parameter: {0}")]
     // ReqParamError(String),
+
     #[error(transparent)]
     SeaOrmDbError(#[from] sea_orm::DbErr),
 
     #[error(transparent)]
     SerdeQsError(#[from] serde_qs::Error),
+
+    #[error(transparent)]
+    ReqwestError(#[from] reqwest::Error),
+
+    #[error(transparent)]
+    JwtError(#[from] jsonwebtoken::errors::Error),
 
     #[error(transparent)]
     VarError(#[from] std::env::VarError),
@@ -22,7 +29,7 @@ pub enum Error {
     IoError(#[from] std::io::Error),
 
     #[error(transparent)]
-    ReqwestError(#[from] reqwest::Error),
+    ParseNumError(#[from] std::num::ParseIntError),
 
     #[error(transparent)]
     Other(#[from] anyhow::Error),

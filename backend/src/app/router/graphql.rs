@@ -6,7 +6,7 @@ use axum::{
     Router,
 };
 
-pub fn routes() -> Router<crate::AppState> {
+pub fn routes() -> Router<crate::ServeState> {
     let schema = crate::app::schema::build_schema();
     Router::new()
         .route("/", get(get_graphiql).post(post_graphql))
@@ -45,6 +45,6 @@ pub async fn get_graphiql(version: Option<Path<String>>, query: Option<Query<Pla
     ))
 }
 
-pub async fn post_graphql(State(state): State<crate::AppState>, Extension(schema): Extension<crate::app::schema::AppSchema>, req: GraphQLRequest) -> GraphQLResponse {
+pub async fn post_graphql(State(state): State<crate::ServeState>, Extension(schema): Extension<crate::app::schema::AppSchema>, req: GraphQLRequest) -> GraphQLResponse {
     schema.execute(req.into_inner().data(state)).await.into()
 }

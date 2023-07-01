@@ -1,20 +1,14 @@
 use axum::{
     extract::{Query, State},
-    http::StatusCode,
-    response::{IntoResponse, Json, Redirect},
+    response::{IntoResponse, Redirect},
     routing::get,
     Router,
 };
-use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, QueryFilter, QuerySelect, Set};
-
-use crate::app::entity;
+use crate::app::entity::{user, prelude::*};
 
 pub fn routes() -> Router<crate::AppState> {
     Router::new()
-        .route(
-            "/",
-            get(|State(state): State<crate::AppState>| async move { Redirect::temporary(&state.github_oauth_url) }),
-        )
+        .route("/", get(|State(state): State<crate::AppState>| async move { Redirect::temporary(&state.github_oauth_url) }))
         .route("/callback", get(callback))
 }
 
@@ -26,6 +20,7 @@ pub struct CallbackQuery {
 pub(crate) async fn callback(State(state): State<crate::AppState>, query: Query<CallbackQuery>) -> Result<impl IntoResponse, crate::Error> {
     let github_oauth_client_id = std::env::var("GITHUB_OAUTH_CLIENT_ID").unwrap();
     let github_oauth_client_secret = std::env::var("GITHUB_OAUTH_CLIENT_SECRET").unwrap();
+    let github_oauth_success_url = std::env::var("GITHUB_OAUTH_SUCCESS_URL").unwrap();
     let client = reqwest::Client::new();
     let resp = client
         .get("https://github.com/login/oauth/access_token")
@@ -57,29 +52,31 @@ pub(crate) async fn callback(State(state): State<crate::AppState>, query: Query<
     log::trace!("hhttps://api.github.com/user => {:?}", resp);
 
     let username = format!("{}", resp["login"]);
-    let user = entity::user::Entity::find()
-        .select_only()
-        .columns([
-            entity::user::Column::Id,
-            entity::user::Column::Name,
-            entity::user::Column::Username,
-            entity::user::Column::Email,
-        ])
-        .filter(entity::user::Column::Username.eq(username.clone()))
-        .into_model::<serde_json::Value>()
+    let mut user = user::ActiveModel {
+        name: Set(Some(format!("{}", resp["name"]))),
+        username: Set(username.clone()),
+        email: Set(format!("{}", resp["email"])),
+        github_data: Set(Some(resp)),
+        ..Default::default()
+    };
+    let db_user = User::find()
+        // .select_only()
+        // .columns([
+        //     user::Column::Id,
+        // ])
+        .filter(user::Column::Username.eq(username.clone()))
+        // .into_model::<serde_json::Value>()
+        // .into_json()
         .one(&state.db_conn)
         .await?;
-    if let Some(user) = user {
-        Ok((StatusCode::OK, Json(user)))
+    let ret;
+    if let Some(db_user) = db_user {
+        user.id = Set(db_user.id);
+        ret = user.update(&state.db_conn).await?;
     } else {
-        let user = entity::user::ActiveModel {
-            name: Set(Some(format!("{}", resp["name"]))),
-            username: Set(username.clone()),
-            email: Set(format!("{}", resp["email"])),
-            github_extra: Set(Some(resp)),
-            ..Default::default()
-        };
-        let user: entity::user::Model = user.insert(&state.db_conn).await?;
-        Ok((StatusCode::OK, Json(serde_json::json!(user))))
+        ret = user.insert(&state.db_conn).await?;
     }
+    log::debug!("{}", serde_json::json!(ret));
+
+    Ok(Redirect::temporary(&github_oauth_success_url))
 }

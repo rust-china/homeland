@@ -35,17 +35,19 @@ impl AppState {
     async fn init() -> anyhow::Result<Self> {
         let github_oauth_client_id = std::env::var("GITHUB_OAUTH_CLIENT_ID").unwrap();
         let github_oauth_redirect_url = std::env::var("GITHUB_OAUTH_REDIRECT_URL").unwrap();
-        let database_url = std::env::var("DATABASE_URL").unwrap();
-        let mut opt = ConnectOptions::new(database_url);
-        opt.sqlx_logging(false) // Disabling SQLx log
-            .sqlx_logging_level(log::LevelFilter::Info); // Setting SQLx log level
-        let db_conn = Database::connect(opt).await?;
+
         Ok(Self {
             github_oauth_url: format!(
                 "https://github.com/login/oauth/authorize?client_id={}&redirect_uri={}&scope=user:email",
                 github_oauth_client_id, github_oauth_redirect_url
             ),
-            db_conn,
+            db_conn: {
+                let database_url = std::env::var("DATABASE_URL").unwrap();
+                let mut opt = ConnectOptions::new(database_url);
+                opt.sqlx_logging(false) // Disabling SQLx log
+                    .sqlx_logging_level(log::LevelFilter::Info); // Setting SQLx log level
+                Database::connect(opt).await?
+            },
         })
     }
 }

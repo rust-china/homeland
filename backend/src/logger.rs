@@ -17,10 +17,7 @@ impl FormatTime for LocalTimer {
 
 pub fn logging() -> anyhow::Result<()> {
     LogTracer::init().with_context(|| "setting default LogTracer failed")?;
-    let format = tracing_subscriber::fmt::format()
-        .with_level(true)
-        .with_target(true)
-        .with_timer(LocalTimer);
+    let format = tracing_subscriber::fmt::format().with_level(true).with_target(true).with_timer(LocalTimer);
     let subscriber = tracing_subscriber::FmtSubscriber::builder()
         // .with_max_level(tracing::Level::DEBUG)
         .with_env_filter(EnvFilter::from_default_env())

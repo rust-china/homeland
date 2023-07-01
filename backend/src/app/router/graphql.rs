@@ -45,10 +45,6 @@ pub async fn get_graphiql(version: Option<Path<String>>, query: Option<Query<Pla
     ))
 }
 
-pub async fn post_graphql(
-    State(state): State<crate::AppState>,
-    Extension(schema): Extension<crate::app::schema::AppSchema>,
-    req: GraphQLRequest,
-) -> GraphQLResponse {
+pub async fn post_graphql(State(state): State<crate::AppState>, Extension(schema): Extension<crate::app::schema::AppSchema>, req: GraphQLRequest) -> GraphQLResponse {
     schema.execute(req.into_inner().data(state)).await.into()
 }

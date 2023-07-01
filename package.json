@@ -6,8 +6,9 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "cargo:run": "cd backend && cargo run",
-    "vue:dev": "cd frontend && npm run dev",
+    "backend:dev": "cd backend && cargo watch -x run",
+    "frontend:dev": "cd frontend && npm run dev",
+    "dev": "run-p backend:dev frontend:dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

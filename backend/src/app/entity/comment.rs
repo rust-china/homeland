@@ -4,17 +4,15 @@ use sea_orm::entity::prelude::*;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel, Eq, Serialize, Deserialize)]
-#[sea_orm(table_name = "post")]
+#[sea_orm(table_name = "comment")]
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,
-    #[sea_orm(unique)]
-    pub uuid: Uuid,
     pub user_id: i32,
-    pub category_id: i32,
-    pub title: String,
+    pub post_id: i32,
+    pub root_id: Option<i32>,
+    pub parent_id: Option<i32>,
     pub body: String,
-    pub score: i32,
     pub extra_data: Option<Json>,
     pub deleted_at: Option<DateTime>,
     pub created_at: DateTime,
@@ -23,18 +21,18 @@ pub struct Model {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
+    #[sea_orm(belongs_to = "Entity", from = "Column::ParentId", to = "Column::Id", on_update = "NoAction", on_delete = "NoAction")]
+    SelfRef2,
+    #[sea_orm(belongs_to = "Entity", from = "Column::RootId", to = "Column::Id", on_update = "NoAction", on_delete = "NoAction")]
+    SelfRef1,
     #[sea_orm(
-        belongs_to = "super::category::Entity",
-        from = "Column::CategoryId",
-        to = "super::category::Column::Id",
+        belongs_to = "super::post::Entity",
+        from = "Column::PostId",
+        to = "super::post::Column::Id",
         on_update = "NoAction",
         on_delete = "NoAction"
     )]
-    Category,
-    #[sea_orm(has_many = "super::comment::Entity")]
-    Comment,
-    #[sea_orm(has_many = "super::notification::Entity")]
-    Notification,
+    Post,
     #[sea_orm(
         belongs_to = "super::user::Entity",
         from = "Column::UserId",
@@ -45,21 +43,9 @@ pub enum Relation {
     User,
 }
 
-impl Related<super::category::Entity> for Entity {
+impl Related<super::post::Entity> for Entity {
     fn to() -> RelationDef {
-        Relation::Category.def()
-    }
-}
-
-impl Related<super::comment::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Comment.def()
-    }
-}
-
-impl Related<super::notification::Entity> for Entity {
-    fn to() -> RelationDef {
-        Relation::Notification.def()
+        Relation::Post.def()
     }
 }
 

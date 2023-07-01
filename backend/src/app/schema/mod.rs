@@ -1,5 +1,5 @@
+// mod auth;
 mod health;
-mod auth;
 mod post;
 
 use async_graphql::*;
@@ -8,13 +8,12 @@ use async_graphql::*;
 pub struct AppQuery(health::HealthQuery, post::PostQuery);
 
 #[derive(Default, MergedObject)]
-pub struct AppMutation(auth::AuthMutation, post::PostMutation);
+pub struct AppMutation(/* auth::AuthMutation, */post::PostMutation);
 
 #[derive(Default, MergedSubscription)]
 pub struct AppSubscription(post::PostSubscription);
 
 pub type AppSchema = Schema<AppQuery, AppMutation, AppSubscription>;
 pub fn build_schema() -> AppSchema {
-    Schema::build(AppQuery::default(), AppMutation::default(), AppSubscription::default())
-    .finish()
+    Schema::build(AppQuery::default(), AppMutation::default(), AppSubscription::default()).finish()
 }

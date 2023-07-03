@@ -13,7 +13,9 @@ export const render = async (ctx: Record<string, any>, manifest: Record<string, 
 	await router.isReady()
 
 	const ssrState = JSON.stringify({
-		piniaState: pinia.state.value
+		piniaState: {
+			...pinia.state.value,
+		}
 	})
 
 	// 注入vue ssr中的上下文对象，获取方法useSSRContext()

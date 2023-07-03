@@ -1,10 +1,5 @@
 use crate::app::entity::{prelude::*, user};
-use axum::{
-    extract::State,
-    response::{AppendHeaders, IntoResponse, Redirect},
-    routing::get,
-    Json, Router,
-};
+use axum::{extract::State, routing::get, Json, Router};
 
 pub fn routes() -> Router<crate::ServeState> {
     Router::new().route(
@@ -16,6 +11,7 @@ pub fn routes() -> Router<crate::ServeState> {
                 .columns([
                     user::Column::Id,
                     user::Column::Username,
+                    user::Column::Name,
                     user::Column::Email,
                     user::Column::CreatedAt,
                     user::Column::UpdatedAt,

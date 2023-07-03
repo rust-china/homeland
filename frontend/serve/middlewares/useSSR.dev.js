@@ -2,31 +2,36 @@ const fs = require('fs')
 const path = require('path')
 const vite = require('vite')
 const koaConnect = require('koa-connect')
+const koaStatic = require('koa-static')
 
 const projectPath = path.resolve(__dirname, '../../');
-
 module.exports = async function useSSR(app) {
-	// 以中间件模式创建 Vite 应用，这将禁用 Vite 自身的 HTML 服务逻辑
-	// 并让上级服务器接管控制
-	const viteServer = await vite.createServer({
-		root: projectPath,
-		logLevel: 'info',
-		server: {
-			middlewareMode: true,
-			watch: {
-				// During tests we edit the files too fast and sometimes chokidar
-				// misses change events, so enforce polling for consistency
-				usePolling: true,
-				interval: 100
-			},
-		},
-		appType: 'custom'
-	})
-	app.use(koaConnect(viteServer.middlewares))
+  app.use(koaStatic(path.resolve(projectPath, '/public'), {
+    maxAge: 1000 * 60 * 60 * 24 * 7,
+    gzip: true,
+    index: false
+  }))
+  // 以中间件模式创建 Vite 应用，这将禁用 Vite 自身的 HTML 服务逻辑
+  // 并让上级服务器接管控制
+  const viteServer = await vite.createServer({
+    root: projectPath,
+    logLevel: 'info',
+    server: {
+      middlewareMode: true,
+      watch: {
+        // During tests we edit the files too fast and sometimes chokidar
+        // misses change events, so enforce polling for consistency
+        usePolling: true,
+        interval: 100
+      },
+    },
+    appType: 'custom'
+  })
+  app.use(koaConnect(viteServer.middlewares))
 
-	// 1. 读取 index.html
+  // 1. 读取 index.html
   const indexTemplate = fs.readFileSync(path.resolve(projectPath, 'index.html'), 'utf-8')
-	app.use(async (ctx, next) => {
+  app.use(async (ctx, next) => {
     await next()
     if (ctx.body) { return; }
 
@@ -45,8 +50,8 @@ module.exports = async function useSSR(app) {
       //    例如 ReactDOMServer.renderToString()
       const { renderedHtml, preloadLinks, ssrState } = await render(ctx, {})
       // 5. 注入渲染后的应用程序 HTML 到模板中。
-			const html = template.replace('<!--ssr-outlet-->', renderedHtml)
-        .replace('<!--ssr-preload-links-->', preloadLinks + `<script>window.__SSR_GLOBAL_STATE__ = ${ssrState};</script>`)
+      const html = template.replace('<!--ssr-outlet-->', renderedHtml)
+        .replace('<!--ssr-preload-links-->', preloadLinks + `<script>window.__SSR_STATE__ = ${ssrState};</script>`)
       ctx.type = 'text/html'
       ctx.body = html
     } catch (e) {

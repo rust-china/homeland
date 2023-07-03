@@ -1,5 +1,5 @@
 import { createSSRApp } from 'vue'
-import { createPinia } from 'pinia'
+import { createPinia } from './stores'
 import router from './router'
 
 import App from './App.vue'

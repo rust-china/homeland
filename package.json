@@ -6,9 +6,9 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "backend:dev": "cd backend && cargo watch -x run",
-    "frontend:dev": "cd frontend && npm run dev",
-    "dev": "run-p backend:dev frontend:dev",
+    "dev:backend": "cd backend && cargo watch -x run",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev": "run-p dev:backend dev:frontend",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

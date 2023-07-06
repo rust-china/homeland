@@ -97,7 +97,7 @@ impl MigrationTrait for Migration {
                             .from(Comment::Table, Comment::PostId)
                             .to(Post::Table, Post::Id),
                     )
-                    .col(ColumnDef::new(Category::Ancestry).string())
+                    .col(ColumnDef::new(Comment::Ancestry).string())
                     .col(ColumnDef::new(Comment::Body).string().not_null())
                     .col(ColumnDef::new(Comment::ExtraData).json())
                     .col(ColumnDef::new(Comment::DeletedAt).timestamp())
@@ -200,10 +200,9 @@ enum Comment {
     Id,
     UserId,
     PostId,
-    RootId,
-    ParentId,
     Body,
     ExtraData,
+    Ancestry,
     DeletedAt,
     CreatedAt,
     UpdatedAt,

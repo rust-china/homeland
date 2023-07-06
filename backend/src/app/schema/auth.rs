@@ -15,29 +15,27 @@ impl AuthMutation {
     // }
     pub async fn user(&self, ctx: &Context<'_>) -> Result<serde_json::Value> {
         let state = ctx.data::<crate::AppState>()?;
-        if let Some(claims) = ctx.data::<Option<crate::serve::jwt::Claims>>()? {
-            let sub = &claims.sub;
-            let db_user = User::find()
-                .select_only()
-                .columns([
-                    user::Column::Id,
-                    user::Column::Username,
-                    user::Column::Name,
-                    user::Column::Email,
-                    user::Column::CreatedAt,
-                    user::Column::UpdatedAt,
-                ])
-                .filter(user::Column::Username.eq(sub.username.clone()))
-                .into_json()
-                .one(&state.db_conn)
-                .await?;
-            if let Some(db_user) = db_user {
-                Ok(db_user)
-            } else {
-                Err(Error::new_with_source(crate::Error::Message("no user".into())))
-            }
-        } else {
-            Err(Error::new_with_source(crate::Error::Message("not login".into())))
-        }
+        let claims = ctx
+            .data::<Option<crate::serve::jwt::Claims>>()?
+            .as_ref()
+            .ok_or_else(|| Error::new_with_source(crate::Error::Message("should login".into())))?;
+
+        let sub = &claims.sub;
+        let db_user = User::find()
+            .select_only()
+            .columns([
+                user::Column::Id,
+                user::Column::Username,
+                user::Column::Name,
+                user::Column::Email,
+                user::Column::CreatedAt,
+                user::Column::UpdatedAt,
+            ])
+            .filter(user::Column::Username.eq(sub.username.clone()))
+            .into_json()
+            .one(&state.db_conn)
+            .await?
+            .ok_or_else(|| Error::new_with_source(crate::Error::Message("user not exists".into())))?;
+        Ok(db_user)
     }
 }

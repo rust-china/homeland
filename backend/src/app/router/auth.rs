@@ -1,10 +1,10 @@
 use crate::app::entity::{prelude::*, user};
 use axum::{extract::State, routing::get, Json, Router};
 
-pub fn routes() -> Router<crate::ServeState> {
+pub fn routes() -> Router<crate::AppState> {
     Router::new().route(
         "/user",
-        get(|State(state): State<crate::ServeState>, claims: crate::serve::jwt::Claims| async move {
+        get(|State(state): State<crate::AppState>, claims: crate::serve::jwt::Claims| async move {
             let sub = claims.sub;
             let db_user = User::find()
                 .select_only()

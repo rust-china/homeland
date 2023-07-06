@@ -24,6 +24,8 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
+        let username_idx = sea_query::Index::create().name("idx-indexes-index2_attr").table(User::Table).col(User::Username).to_owned();
+        manager.create_index(username_idx).await?;
 
         manager
             .create_table(
@@ -95,20 +97,7 @@ impl MigrationTrait for Migration {
                             .from(Comment::Table, Comment::PostId)
                             .to(Post::Table, Post::Id),
                     )
-                    .col(ColumnDef::new(Comment::RootId).integer())
-                    .foreign_key(
-                        ForeignKey::create()
-                            .name("fk-comment-root_id")
-                            .from(Comment::Table, Comment::RootId)
-                            .to(Comment::Table, Comment::Id),
-                    )
-                    .col(ColumnDef::new(Comment::ParentId).integer())
-                    .foreign_key(
-                        ForeignKey::create()
-                            .name("fk-comment-parent_id")
-                            .from(Comment::Table, Comment::ParentId)
-                            .to(Comment::Table, Comment::Id),
-                    )
+                    .col(ColumnDef::new(Category::Ancestry).string())
                     .col(ColumnDef::new(Comment::Body).string().not_null())
                     .col(ColumnDef::new(Comment::ExtraData).json())
                     .col(ColumnDef::new(Comment::DeletedAt).timestamp())

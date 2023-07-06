@@ -7,12 +7,16 @@ use axum::{
     Router,
 };
 
-pub fn routes() -> Router<crate::ServeState> {
+pub fn routes() -> Router<crate::AppState> {
+    let github_oauth_client_id = std::env::var("GITHUB_OAUTH_CLIENT_ID").unwrap();
+    let github_oauth_redirect_url = std::env::var("GITHUB_OAUTH_REDIRECT_URL").unwrap();
+    let github_oauth_url = format!(
+        "https://github.com/login/oauth/authorize?client_id={}&redirect_uri={}&scope=user:email",
+        github_oauth_client_id, github_oauth_redirect_url
+    );
+
     Router::new()
-        .route(
-            "/",
-            get(|State(state): State<crate::ServeState>| async move { Redirect::temporary(&state.github_oauth_url) }),
-        )
+        .route("/", get(|| async move { Redirect::temporary(&github_oauth_url) }))
         .route("/callback", get(callback))
 }
 
@@ -24,8 +28,8 @@ pub struct CallbackQuery {
 struct DbUser {
     id: i32,
 }
-pub(crate) async fn callback(State(state): State<crate::ServeState>, query: Query<CallbackQuery>) -> Result<impl IntoResponse, crate::Error> {
-    let handle  = || async {
+pub(crate) async fn callback(State(state): State<crate::AppState>, query: Query<CallbackQuery>) -> Result<impl IntoResponse, crate::Error> {
+    let handle = || async {
         let github_oauth_client_id = std::env::var("GITHUB_OAUTH_CLIENT_ID").unwrap();
         let github_oauth_client_secret = std::env::var("GITHUB_OAUTH_CLIENT_SECRET").unwrap();
         let github_oauth_success_url = std::env::var("GITHUB_OAUTH_SUCCESS_URL").unwrap();
@@ -43,12 +47,12 @@ pub(crate) async fn callback(State(state): State<crate::ServeState>, query: Quer
             .await?;
         log::trace!("https://github.com/login/oauth/access_token => {:?}", resp);
         let params: std::collections::HashMap<String, String> = serde_qs::from_str(&resp)?;
-    
+
         let access_token = match params.get("access_token") {
             Some(value) => value,
             None => return Err(crate::Error::Message(resp)),
         };
-    
+
         let resp = client
             .get("https://api.github.com/user")
             .header("User-Agent", "Awesome-Octocat-App")
@@ -58,7 +62,7 @@ pub(crate) async fn callback(State(state): State<crate::ServeState>, query: Quer
             .json::<serde_json::Value>()
             .await?;
         log::trace!("https://api.github.com/user => {:?}", resp);
-    
+
         let username = format!("{}", resp["login"].as_str().unwrap_or(""));
         let mut user = user::ActiveModel {
             name: Set(Some(format!("{}", resp["name"].as_str().unwrap_or("")))),
@@ -83,18 +87,22 @@ pub(crate) async fn callback(State(state): State<crate::ServeState>, query: Quer
             ret = user.insert(&state.db_conn).await?;
         }
         log::trace!("saved: {}", serde_json::json!(ret));
-    
+
         let max_age: i64 = std::env::var("JWT_MAX_AGE")?.parse::<i64>()?;
-        let sub = crate::serve::jwt::Sub { user_id: ret.id, username: ret.username };
+        let sub = crate::serve::jwt::Sub {
+            user_id: ret.id,
+            username: ret.username,
+        };
         let token_cookie = crate::serve::jwt::build_cookie("token", sub.clone(), max_age)?;
-    
-        return Ok((AppendHeaders([(header::SET_COOKIE, token_cookie.to_string())]), Redirect::temporary(&github_oauth_success_url)))
+
+        return Ok((
+            AppendHeaders([(header::SET_COOKIE, token_cookie.to_string())]),
+            Redirect::temporary(&github_oauth_success_url),
+        ));
     };
 
     match handle().await {
         Ok(v) => Ok(v),
-        Err(_e) => Err(crate::Error::Message("auth error".into()))
+        Err(_e) => Err(crate::Error::Message("auth error".into())),
     }
-
-    
 }

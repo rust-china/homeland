@@ -10,8 +10,7 @@ pub struct Model {
     pub id: i32,
     pub user_id: i32,
     pub post_id: i32,
-    pub root_id: Option<i32>,
-    pub parent_id: Option<i32>,
+    pub ancestry: Option<String>,
     pub body: String,
     pub extra_data: Option<Json>,
     pub deleted_at: Option<DateTime>,
@@ -21,10 +20,6 @@ pub struct Model {
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
 pub enum Relation {
-    #[sea_orm(belongs_to = "Entity", from = "Column::ParentId", to = "Column::Id", on_update = "NoAction", on_delete = "NoAction")]
-    SelfRef2,
-    #[sea_orm(belongs_to = "Entity", from = "Column::RootId", to = "Column::Id", on_update = "NoAction", on_delete = "NoAction")]
-    SelfRef1,
     #[sea_orm(
         belongs_to = "super::post::Entity",
         from = "Column::PostId",

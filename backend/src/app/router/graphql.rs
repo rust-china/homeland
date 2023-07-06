@@ -1,18 +1,18 @@
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse, GraphQLSubscription};
 use axum::{
-    extract::{Extension, Path, Query, State},
+    extract::{Path, Query, State},
     response::{Html, IntoResponse},
     routing::get,
     Router,
 };
 
-pub fn routes() -> Router<crate::ServeState> {
-    let schema = crate::app::schema::build_schema();
+pub fn routes() -> Router<crate::AppState> {
+    let schema = crate::APP_STATE.get().unwrap().schema.clone();
     Router::new()
         .route("/", get(get_graphiql).post(post_graphql))
         .route("/:version", get(get_graphiql))
-        .route_service("/ws", GraphQLSubscription::new(schema.clone()))
-        .layer(Extension(schema))
+        .route_service("/ws", GraphQLSubscription::new(schema))
+        // .layer(Extension(schema))
 }
 
 #[derive(serde::Deserialize)]
@@ -45,6 +45,6 @@ pub async fn get_graphiql(version: Option<Path<String>>, query: Option<Query<Pla
     ))
 }
 
-pub async fn post_graphql(State(state): State<crate::ServeState>, Extension(schema): Extension<crate::app::schema::AppSchema>, req: GraphQLRequest) -> GraphQLResponse {
-    schema.execute(req.into_inner().data(state)).await.into()
+pub async fn post_graphql(State(state): State<crate::AppState>, claims: Option<crate::serve::jwt::Claims>/* , Extension(schema): Extension<crate::app::schema::AppSchema>*/, req: GraphQLRequest) -> GraphQLResponse {
+    state.schema.execute(req.into_inner().data(state.clone()).data(claims)).await.into()
 }

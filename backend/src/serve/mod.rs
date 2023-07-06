@@ -1,5 +1,4 @@
 pub mod jwt;
-
 use std::net::SocketAddr;
 
 use axum::http::{
@@ -7,7 +6,6 @@ use axum::http::{
     HeaderValue, Method,
 };
 use axum::{routing::get, Router, Server};
-use sea_orm::{ConnectOptions, Database, DbConn};
 use tower_http::cors::{ self, CorsLayer};
 
 pub fn cors_layer() -> CorsLayer {
@@ -27,35 +25,8 @@ pub fn cors_layer() -> CorsLayer {
     // CorsLayer::new()
 }
 
-#[derive(Debug, Clone)]
-pub struct ServeState {
-    pub github_oauth_url: String,
-    pub db_conn: DbConn,
-}
-
-impl ServeState {
-    pub async fn init() -> anyhow::Result<Self> {
-        let github_oauth_client_id = std::env::var("GITHUB_OAUTH_CLIENT_ID").unwrap();
-        let github_oauth_redirect_url = std::env::var("GITHUB_OAUTH_REDIRECT_URL").unwrap();
-
-        Ok(Self {
-            github_oauth_url: format!(
-                "https://github.com/login/oauth/authorize?client_id={}&redirect_uri={}&scope=user:email",
-                github_oauth_client_id, github_oauth_redirect_url
-            ),
-            db_conn: {
-                let database_url = std::env::var("DATABASE_URL").unwrap();
-                let mut opt = ConnectOptions::new(database_url);
-                opt.sqlx_logging(false) // Disabling SQLx log
-                    .sqlx_logging_level(log::LevelFilter::Info); // Setting SQLx log level
-                Database::connect(opt).await?
-            },
-        })
-    }
-}
-
 pub async fn listen(addr: SocketAddr) -> anyhow::Result<()> {
-    let state = ServeState::init().await?;
+    let state = crate::app::AppState::init().await?;
     let app = Router::new()
         .route("/", get(|claims: Option<jwt::Claims>| async move { 
             let mut text = "Welcome".to_string();

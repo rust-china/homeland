@@ -6,6 +6,9 @@ use axum::{
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
+    #[error("code: {0}, message: {1}")]
+    RespMessage(i32, String),
+
     #[error("{0}")]
     Message(String),
     // #[error("error request parameter: {0}")]
@@ -43,11 +46,16 @@ struct ErrorJson {
 
 impl IntoResponse for Error {
     fn into_response(self) -> Response {
-        let json = ErrorJson {
-            code: 422,
-            message: format!("Error: {}", self.to_string()),
+        let json = {
+            if let Error::RespMessage(code, message) = self {
+                ErrorJson { code, message }
+            } else {
+                ErrorJson {
+                    code: 422,
+                    message: format!("Error: {}", self.to_string()),
+                }
+            }
         };
-
         (StatusCode::INTERNAL_SERVER_ERROR, Json(json)).into_response()
     }
 }

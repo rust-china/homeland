@@ -73,7 +73,7 @@ impl Related<super::user::Entity> for Entity {
 impl ActiveModelBehavior for ActiveModel {
     fn new() -> Self {
         Self {
-            uuid: Set(Uuid::new_v4()),
+            uuid: Set(uuid::Uuid::new_v4()),
             ..ActiveModelTrait::default()
         }
     }

@@ -58,7 +58,7 @@ where
         if let Some(token) = cookie.get("token") {
             Ok(decode(token)?)
         } else {
-            return Err(crate::Error::Message("token not exists".into()));
+            return Err(crate::Error::RespMessage(401, "token not exists".into()));
         }
     }
 }

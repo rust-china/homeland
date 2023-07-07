@@ -1,4 +1,4 @@
-use crate::app::entity::{prelude::*, user};
+use entity::{prelude::*, user};
 use axum::{extract::State, routing::get, Json, Router};
 
 pub fn routes() -> Router<crate::AppState> {

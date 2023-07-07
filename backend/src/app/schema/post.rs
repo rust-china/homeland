@@ -1,4 +1,4 @@
-use crate::app::entity::{post, prelude::*};
+use entity::{post, prelude::*};
 use async_graphql::*;
 use futures_util::StreamExt;
 use std::time::Duration;
@@ -51,11 +51,26 @@ impl PostQuery {
     }
 }
 
+#[derive(InputObject)]
+pub struct CreatePost {
+	category_id: i32,
+	title: String,
+    body: String,
+}
+
+#[derive(InputObject)]
+pub struct UpdatePost {
+    category_id: i32,
+	uuid: String,
+	title: String,
+    body: String,
+}
+
 #[derive(Default)]
 pub struct PostMutation;
 #[Object]
 impl PostMutation {
-    pub async fn create_post(&self, ctx: &Context<'_>, #[graphql(default = 1)] category_id: i32, title: String, body: String) -> Result<serde_json::Value> {
+    pub async fn create_post(&self, ctx: &Context<'_>, input: CreatePost) -> Result<serde_json::Value> {
         let state = ctx.data::<crate::AppState>()?;
         let claims = ctx
             .data::<Option<crate::serve::jwt::Claims>>()?
@@ -63,16 +78,16 @@ impl PostMutation {
             .ok_or_else(|| Error::new_with_source(crate::Error::Message("should login".into())))?;
 
         let post = post::ActiveModel {
-            title: Set(title),
-            body: Set(body),
-            category_id: Set(category_id),
+            title: Set(input.title),
+            body: Set(input.body),
+            category_id: Set(input.category_id),
             user_id: Set(claims.sub.user_id),
             ..Default::default()
         };
         let post: post::Model = post.insert(&state.db_conn).await?;
         Ok(serde_json::json!(post))
     }
-    pub async fn update_post(&self, ctx: &Context<'_>, uuid: String, title: String, body: String) -> Result<serde_json::Value> {
+    pub async fn update_post(&self, ctx: &Context<'_>, input: UpdatePost) -> Result<serde_json::Value> {
         let state = ctx.data::<crate::AppState>()?;
         let claims = ctx
             .data::<Option<crate::serve::jwt::Claims>>()?
@@ -81,13 +96,14 @@ impl PostMutation {
 
         // let post = post::Entity::find_by_id(id).one(&state.db_conn).await?;
         let post = Post::find()
-            .filter(Condition::all().add(post::Column::Uuid.eq(Uuid::parse_str(&uuid)?)).add(post::Column::UserId.eq(claims.sub.user_id)))
+            .filter(Condition::all().add(post::Column::Uuid.eq(Uuid::parse_str(&input.uuid)?)).add(post::Column::UserId.eq(claims.sub.user_id)))
             .one(&state.db_conn)
             .await?
             .ok_or_else(|| Error::new_with_source(crate::Error::Message("no post".into())))?;
         let mut post: post::ActiveModel = post.into();
-        post.title = Set(title);
-        post.body = Set(body);
+        post.category_id = Set(input.category_id);
+        post.title = Set(input.title);
+        post.body = Set(input.body);
         let post: post::Model = post.update(&state.db_conn).await?;
         Ok(serde_json::json!(post))
     }

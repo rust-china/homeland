@@ -1,6 +1,6 @@
-pub mod entity;
 pub mod schema;
 pub mod router;
+pub use entity;
 
 use sea_orm::{ConnectOptions, Database, DbConn};
 use tokio::sync::OnceCell;

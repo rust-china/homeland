@@ -116,6 +116,7 @@ dependencies = [
  "async-trait",
  "base64 0.13.1",
  "bytes",
+ "chrono",
  "fast_chemail",
  "fnv",
  "futures-util",
@@ -328,7 +329,7 @@ dependencies = [
  "axum-extra",
  "chrono",
  "dotenvy",
- "futures-util",
+ "entity",
  "jsonwebtoken",
  "log",
  "once_cell",
@@ -346,7 +347,6 @@ dependencies = [
  "tracing-log",
  "tracing-subscriber",
  "url",
- "uuid",
 ]
 
 [[package]]
@@ -735,6 +735,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "071a31f4ee85403370b58aca746f01041ede6f0da2730960ad001edc2b71b394"
 dependencies = [
  "cfg-if",
+]
+
+[[package]]
+name = "entity"
+version = "0.1.0"
+dependencies = [
+ "futures-util",
+ "sea-orm",
+ "serde",
+ "serde_json",
+ "uuid",
 ]
 
 [[package]]
@@ -1353,6 +1364,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "dotenvy",
+ "entity",
  "sea-orm-migration",
  "tokio",
 ]

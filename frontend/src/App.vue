@@ -1,21 +1,23 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
+import Layout from '@/components/Layout/index.vue'
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="@/assets/images/logo.svg" width="125" height="125" />
-
-    <div class="wrapper mt-10">
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
-        <RouterLink to="/auth/login">Login</RouterLink>
-      </nav>
-    </div>
-  </header>
-
-  <RouterView />
+  <Layout>
+    <header>
+      <img alt="Vue logo" class="logo" src="@/assets/images/logo.svg" width="125" height="125" />
+      <t-button>hello</t-button>
+      <div class="wrapper mt-10">
+        <nav>
+          <RouterLink to="/">Home</RouterLink>
+          <RouterLink to="/about">About</RouterLink>
+          <RouterLink to="/auth/login">Login</RouterLink>
+          <RouterLink to="/posts/new">PostNew</RouterLink>
+        </nav>
+      </div>
+    </header>
+    <RouterView />
+  </Layout>
 </template>
 
 <style scoped>

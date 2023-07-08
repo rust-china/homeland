@@ -8,24 +8,24 @@ impl CategoryQuery {
     pub async fn categories(
         &self,
         ctx: &Context<'_>,
-        name: Option<String>,
+        #[graphql(default)] ancestry: Option<String>,
         #[graphql(default = 1)] page_no: u64,
         #[graphql(default = 20)] page_size: u64,
     ) -> Result<serde_json::Value> {
         let state = ctx.data::<crate::AppState>()?;
 
         let mut condition = Condition::all().add(category::Column::Ancestry.is_null());
-        if let Some(name) = name {
-            condition = condition.add(category::Column::Name.contains(&name));
+        if let Some(ancestry) = ancestry {
+            condition = condition.add(category::Column::Ancestry.contains(&ancestry));
         }
         let category_paginator = Category::find().filter(condition).paginate(&state.db_conn, page_size);
-        let page_categories = category_paginator.fetch_page(page_no).await?;
+        let page_categories = category_paginator.fetch_page(page_no - 1).await?;
         let mut map = serde_json::Map::new();
         map.insert("total_count".into(), category_paginator.num_items().await?.into());
         map.insert("total_page".into(), category_paginator.num_pages().await?.into());
         map.insert("cur_page".into(), page_no.into());
         map.insert("page_size".into(), page_size.into());
-        map.insert("list".into(), serde_json::json!(page_categories));
+        map.insert("data".into(), serde_json::json!(page_categories));
 
         Ok(serde_json::Value::Object(map))
     }

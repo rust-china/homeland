@@ -67,7 +67,7 @@ impl MigrationTrait for Migration {
                             .to(Category::Table, Category::Id),
                     )
                     .col(ColumnDef::new(Post::Title).string().not_null())
-                    .col(ColumnDef::new(Post::Body).string().not_null())
+                    .col(ColumnDef::new(Post::Body).text().not_null())
                     .col(ColumnDef::new(Post::Score).integer().not_null().default(0))
                     .col(ColumnDef::new(Post::ExtraData).json())
                     .col(ColumnDef::new(Post::DeletedAt).timestamp())

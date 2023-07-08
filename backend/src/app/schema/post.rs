@@ -21,13 +21,13 @@ impl PostQuery {
             condition = condition.add(post::Column::Title.contains(&title));
         }
         let post_paginator = Post::find().filter(condition).paginate(&state.db_conn, page_size);
-        let page_posts = post_paginator.fetch_page(page_no).await?;
+        let page_posts = post_paginator.fetch_page(page_no - 1).await?;
         let mut map = serde_json::Map::new();
         map.insert("total_count".into(), post_paginator.num_items().await?.into());
         map.insert("total_page".into(), post_paginator.num_pages().await?.into());
         map.insert("cur_page".into(), page_no.into());
         map.insert("page_size".into(), page_size.into());
-        map.insert("list".into(), serde_json::json!(page_posts));
+        map.insert("data".into(), serde_json::json!(page_posts));
 
         Ok(serde_json::Value::Object(map))
     }

@@ -21,7 +21,7 @@ pub fn build_schema() -> AppSchema {
     Schema::build(AppQuery::default(), AppMutation::default(), AppSubscription::default())
         .extension(Analyzer) // 启用 Analyzer 扩展
         .extension(ApolloTracing) // 启用 ApolloTracing 扩展
-        .limit_depth(5) // 深度 限制最大深度为 5
-        .limit_complexity(5) // 复杂度 限制最大深度为 5
+        // .limit_depth(5) // 深度 限制最大深度为 5
+        // .limit_complexity(5) // 复杂度 限制最大深度为 5
         .finish()
 }

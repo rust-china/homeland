@@ -1,6 +1,7 @@
 import { createApp } from './main'
 
 import './assets/stylesheets/application.scss'
+import 'tdesign-vue-next/es/style/index.css';
 
 const { app, router, pinia } = createApp()
 

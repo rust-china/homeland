@@ -1,6 +1,7 @@
 {
   "extends": "@tsconfig/node18/tsconfig.json",
   "include": [
+    "types/*.d.ts",
     "vite.config.*",
     "vitest.config.*",
     "cypress.config.*",
@@ -10,6 +11,11 @@
   "compilerOptions": {
     "composite": true,
     "module": "ESNext",
-    "types": ["node"]
+    "types": [
+      "node"
+    ],
+    "paths": {
+      "@/*": ["./src/*"]
+    },
   }
 }

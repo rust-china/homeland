@@ -15,7 +15,6 @@ async function fetchUser() {
 }
 
 onMounted(() => {
-	console.log(123, route.query)
 	if (route.query.ret === 'success') {
 		fetchUser()
 	} else {

@@ -11,6 +11,20 @@ import { TDesignResolver } from 'unplugin-vue-components/resolvers'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  // https://vitejs.dev/config/#server-options
+  server: {
+    host: '0.0.0.0',
+    port: 9000,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        ws: true, // 配置ws跨域
+        secure: false, // https
+        rewrite: (path) => path.replace('/api', '')
+      }
+    }
+  },
   resolve: {
     alias: {
       '@': resolve(__dirname, './src')

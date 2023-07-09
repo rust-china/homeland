@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useUserStore } from '@/stores/user'
-import { useQuery, useSubscription, gql } from '@/utils/graphql'
+import { useQuery, gql } from '@/utils/graphql'
 
 const { result: postsResult } = useQuery(gql`
 	query {
@@ -25,9 +25,10 @@ onMounted(() => {
     home {{ userInfo }}
     <t-divider></t-divider>
     <ul>
-      <template v-for="post in posts" :key="post.uuid">
-        <li>{{ post }}</li>
-      </template>
+      {{posts.length}}
+      <!-- <template v-for="post in posts" :key="post.uuid">
+        <li>{{ post.uuid }}</li>
+      </template> -->
     </ul>
 
   </main>

@@ -4,6 +4,7 @@ import { Form as TForm } from 'tdesign-vue-next'
 
 export function useForm(params: FormParams) {
 	const formState: UnwrapNestedRefs<Form> = reactive<Form>({
+		...params,
 		setFormRef: (formRef: any) => {
 			formState.formRef = formRef as any as TFormType
 		},
@@ -42,13 +43,13 @@ export function useForm(params: FormParams) {
 
 export type TFormType = InstanceType<typeof TForm> & FormInstanceFunctions;
 
-export interface FormParams {
+export interface FormParams extends Record<string, any> {
 	model?: Record<string, any>;
 	rules?: Record<string, any[]>;
 	onSubmit: (...args: any[]) => Promise<void>
 }
 
-export interface Form {
+export interface Form extends Record<string, any> {
 	model: Record<string, any>;
 	rules: Record<string, any[]>;
 	setFormRef: (formRef: any) => void;

@@ -5,7 +5,7 @@ import { getMainDefinition } from '@apollo/client/utilities'
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
 import { createClient } from 'graphql-ws'
 
-import { useQuery as useVueQuery, useMutation as useVueMutation, useSubscription as useVueSubscription } from '@vue/apollo-composable'
+export * from '@vue/apollo-composable'
 
 
 const httpLink = createHttpLink({
@@ -18,7 +18,7 @@ const wsLink = typeof window !== "undefined"
 			// return `${location.origin.replace(/^http/, 'ws')}${import.meta.env.VITE_APP_API_BASE_URL}/graphql/ws`
 			return import.meta.env.VITE_APP_GRAPHQL_WEBSOCKET_URL
 		},
-		// lazy: true,
+		lazy: true,
 		// connectionParams: {
 		// 	authToken: user.authToken,
 		// },
@@ -39,21 +39,10 @@ const splitLink = typeof window !== "undefined" && wsLink != null ? split(
 const client = new ApolloClient({
 	link: splitLink,
 	cache: new InMemoryCache(),
-	connectToDevTools: true
+	connectToDevTools: false,
+	ssrMode: import.meta.env.SSR,
 });
 
-export const useQuery = (...args: any[]) => {
-	return import.meta.env.SSR ? { result: ref(null) } : useVueQuery(...args)
-}
-
-export const useMutation = (...args: any[]) => {
-	return import.meta.env.SSR ? { mutate: async () => {} } : useVueMutation(...args)
-}
-
-export const useSubscription= (...args: any[]) => {
-	return import.meta.env.SSR ? { result: reactive({}) } : useVueSubscription(...args)
-}
-
 export {
-	client, gql
+	client, gql, useQuery, useLazyQuery, useMutation, useSubscription
 }

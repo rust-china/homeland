@@ -1,7 +1,9 @@
 import { basename } from 'node:path'
 import { createApp } from './main'
 import { renderToString } from '@vue/server-renderer'
+import fetch from 'node-fetch'
 
+global.fetch = fetch
 // if (import.meta.env.SSR) {
 // 	// ... 仅在服务端执行的逻辑
 // }

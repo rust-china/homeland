@@ -6,7 +6,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: () => import('@/views/home/index.vue')
+      redirect: { path: '/posts' }
     },
     {
       path: '/auth',
@@ -17,11 +17,32 @@ const router = createRouter({
       ]
     },
     {
-      path: '/posts',
-      name: 'posts',
+      path: '/posts/:sort?',
       component: () => import('@/views/posts/index.vue'),
       children: [
-        { path: 'new', name: 'possts/new', component: () => import('@/views/posts/new/index.vue') }
+        { path: '', name: 'posts', component: () => import('@/views/posts/list/index.vue') },
+        { path: 'new', name: 'posts/new', component: () => import('@/views/posts/new/index.vue') }
+      ]
+    },
+    {
+      path: '/jobs',
+      component: () => import('@/views/jobs/index.vue'),
+      children: [
+        { path: '', name: 'jobs', component: () => import('@/views/jobs/list/index.vue') }
+      ]
+    },
+    {
+      path: '/wiki',
+      component: () => import('@/views/wiki/index.vue'),
+      children: [
+        { path: '', name: 'wiki', component: () => import('@/views/wiki/list/index.vue') }
+      ]
+    },
+    {
+      path: '/sites',
+      component: () => import('@/views/sites/index.vue'),
+      children: [
+        { path: '', name: 'sites', component: () => import('@/views/sites/list/index.vue') }
       ]
     },
     {

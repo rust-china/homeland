@@ -1,5 +1,19 @@
 <script setup lang="ts">
 import Layout from '@/components/Layout/index.vue'
+import { useSubscription, gql } from '@/utils/graphql'
+
+const { result: postsSubscribe } = useSubscription(gql`
+  subscription {
+    posts {
+      mutationType,
+      uuid
+    }
+  }
+`)
+
+watch(() => postsSubscribe, (nv) => {
+  console.log('sub posts: ', nv)
+})
 </script>
 
 <template>

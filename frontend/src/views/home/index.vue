@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useUserStore } from '@/stores/user'
-import { useQuery, gql } from '@/utils/graphql'
+import { useQuery, useSubscription, gql } from '@/utils/graphql'
 
 const { result: postsResult } = useQuery(gql`
 	query {
@@ -17,7 +17,6 @@ const posts = computed(() => {
 onMounted(() => {
   userInfo.value = userStore.userInfo
 })
-
 
 </script>
 

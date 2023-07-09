@@ -1,20 +1,24 @@
 // https://v4.apollo.vuejs.org/guide/installation.html#compatibility
 // https://v4.apollo.vuejs.org/guide-composable/query.html#usequery
 import { split, ApolloClient, createHttpLink, InMemoryCache, gql } from '@apollo/client/core'
-import { getMainDefinition } from '@apollo/client/utilities';
-import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
+import { getMainDefinition } from '@apollo/client/utilities'
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
 import { createClient } from 'graphql-ws'
 
 import { useQuery as useVueQuery, useMutation as useVueMutation, useSubscription as useVueSubscription } from '@vue/apollo-composable'
 
 
 const httpLink = createHttpLink({
-	uri: `${import.meta.env.VITE_APP_API_BASE_URL}/graphql`,
+	uri: import.meta.env.VITE_APP_GRAPHQL_HTTP_URL,
 });
 
 const wsLink = typeof window !== "undefined"
 	? new GraphQLWsLink(createClient({
-		url: `${import.meta.env.VITE_APP_API_BASE_URL}/graphql/ws`,
+		url: () => {
+			// return `${location.origin.replace(/^http/, 'ws')}${import.meta.env.VITE_APP_API_BASE_URL}/graphql/ws`
+			return import.meta.env.VITE_APP_GRAPHQL_WEBSOCKET_URL
+		},
+		// lazy: true,
 		// connectionParams: {
 		// 	authToken: user.authToken,
 		// },
@@ -34,7 +38,8 @@ const splitLink = typeof window !== "undefined" && wsLink != null ? split(
 
 const client = new ApolloClient({
 	link: splitLink,
-	cache: new InMemoryCache()
+	cache: new InMemoryCache(),
+	connectToDevTools: true
 });
 
 export const useQuery = (...args: any[]) => {

@@ -68,7 +68,7 @@ pub struct UpdateCategory {
 pub struct CategoryMutation;
 #[Object]
 impl CategoryMutation {
-    pub async fn create_category(&self, ctx: &Context<'_>, input: CreateCategory) -> Result<serde_json::Value> {
+    pub async fn create_category(&self, ctx: &Context<'_>, input: CreateCategory) -> Result<i32> {
         let state = ctx.data::<crate::AppState>()?;
         let claims = ctx
             .data::<Option<crate::serve::jwt::Claims>>()?
@@ -89,9 +89,9 @@ impl CategoryMutation {
         };
         category.set_parent(Some(parent_category));
         let category: category::Model = category.insert(&state.db_conn).await?;
-        Ok(serde_json::json!(category))
+        Ok(category.id)
     }
-    pub async fn update_category(&self, ctx: &Context<'_>, input: UpdateCategory) -> Result<serde_json::Value> {
+    pub async fn update_category(&self, ctx: &Context<'_>, input: UpdateCategory) -> Result<bool> {
         let state = ctx.data::<crate::AppState>()?;
         let claims = ctx
             .data::<Option<crate::serve::jwt::Claims>>()?
@@ -114,8 +114,8 @@ impl CategoryMutation {
             category.set_parent(Some(parent_category))
         }
 
-        let category: category::Model = category.update(&state.db_conn).await?;
-        Ok(serde_json::json!(category))
+        let _category: category::Model = category.update(&state.db_conn).await?;
+        Ok(true)
     }
     pub async fn delete_category(&self, ctx: &Context<'_>, id: i32) -> Result<bool> {
         let state = ctx.data::<crate::AppState>()?;

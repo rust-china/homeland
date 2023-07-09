@@ -1,7 +1,11 @@
 use entity::{post, prelude::*};
 use async_graphql::*;
-use futures_util::StreamExt;
+// use futures_util::StreamExt;
+use tokio_stream::{Stream, StreamExt};
 use std::time::Duration;
+
+use super::SimpleBroker;
+// use super::SimpleBroker;
 
 #[derive(Default, Debug)]
 pub struct PostQuery;
@@ -70,7 +74,7 @@ pub struct UpdatePost {
 pub struct PostMutation;
 #[Object]
 impl PostMutation {
-    pub async fn create_post(&self, ctx: &Context<'_>, input: CreatePost) -> Result<serde_json::Value> {
+    pub async fn create_post(&self, ctx: &Context<'_>, input: CreatePost) -> Result<String> {
         let state = ctx.data::<crate::AppState>()?;
         let claims = ctx
             .data::<Option<crate::serve::jwt::Claims>>()?
@@ -85,9 +89,15 @@ impl PostMutation {
             ..Default::default()
         };
         let post: post::Model = post.insert(&state.db_conn).await?;
-        Ok(serde_json::json!(post))
+
+        SimpleBroker::publish(MutationChange {
+            mutation_type: MutationType::Created,
+            uuid: post.uuid.to_string(),
+        });
+
+        Ok(post.uuid.to_string())
     }
-    pub async fn update_post(&self, ctx: &Context<'_>, input: UpdatePost) -> Result<serde_json::Value> {
+    pub async fn update_post(&self, ctx: &Context<'_>, input: UpdatePost) -> Result<bool> {
         let state = ctx.data::<crate::AppState>()?;
         let claims = ctx
             .data::<Option<crate::serve::jwt::Claims>>()?
@@ -105,7 +115,13 @@ impl PostMutation {
         post.title = Set(input.title);
         post.body = Set(input.body);
         let post: post::Model = post.update(&state.db_conn).await?;
-        Ok(serde_json::json!(post))
+
+        SimpleBroker::publish(MutationChange {
+            mutation_type: MutationType::Updated,
+            uuid: post.uuid.to_string(),
+        });
+
+        Ok(true)
     }
     pub async fn delete_post(&self, ctx: &Context<'_>, uuid: String) -> Result<bool> {
         let state = ctx.data::<crate::AppState>()?;
@@ -120,16 +136,21 @@ impl PostMutation {
             .await?
             .ok_or_else(|| Error::new_with_source(crate::Error::Message("no post".into())))?;
         let ret = post.delete(&state.db_conn).await?;
+
+        SimpleBroker::publish(MutationChange {
+            mutation_type: MutationType::Updated,
+            uuid,
+        });
+
         Ok(ret.rows_affected > 0)
     }
 }
 
 #[derive(Default)]
 pub struct PostSubscription;
-
 #[Subscription]
 impl PostSubscription {
-    pub async fn integers(&self, #[graphql(default = 1)] step: i32) -> impl tokio_stream::Stream<Item = i32> {
+    pub async fn integers(&self, #[graphql(default = 1)] step: i32) -> impl Stream<Item = i32> {
         let mut value = 0;
         let interval = tokio::time::interval(Duration::from_secs(1));
         let stream = tokio_stream::wrappers::IntervalStream::new(interval);
@@ -137,5 +158,38 @@ impl PostSubscription {
             value += step;
             value
         })
+    }
+    pub async fn posts(&self, uuids: Option<Vec<String>>) -> impl Stream<Item = MutationChange> {
+       SimpleBroker::<MutationChange>::subscribe().filter(move |event| {
+        if let Some(uuids) = &uuids {
+            uuids.contains(&event.uuid)
+        } else {
+            true
+        }
+       })
+    }
+}
+
+
+#[derive(Enum, Eq, PartialEq, Copy, Clone)]
+enum MutationType {
+    Created,
+    Updated,
+    Deleted,
+}
+#[derive(Clone, PartialEq)]
+pub struct MutationChange {
+    mutation_type: MutationType,
+    uuid: String,
+}
+
+#[Object]
+impl MutationChange {
+    async fn mutation_type(&self) -> MutationType {
+        self.mutation_type
+    }
+
+    async fn uuid(&self) -> &str {
+        &self.uuid
     }
 }

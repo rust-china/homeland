@@ -67,6 +67,7 @@ serde_qs = { workspace = true }
 time = { workspace = true }
 chrono = { workspace = true }
 once_cell = { workspace = true }
+slab = "0.4"
 
 sea-orm = { workspace = true } 
 entity = { workspace = true }

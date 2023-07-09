@@ -78,3 +78,9 @@ impl ActiveModelBehavior for ActiveModel {
         }
     }
 }
+
+impl Entity {
+    pub fn find_by_uuid(uuid: &str) -> Select<Entity> {
+        Self::find().filter(Column::Uuid.eq(uuid))
+    }
+}

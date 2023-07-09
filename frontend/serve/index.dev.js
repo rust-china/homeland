@@ -14,6 +14,7 @@ async function startApp(port) {
 	await useRouter(app)
 	await useDevSSR(app)
 	
+	
 	app.listen(port, () => {
 		console.log(`server is listening in http://localhost:${port}`)
 	})

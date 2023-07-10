@@ -17,11 +17,18 @@ const router = createRouter({
       ]
     },
     {
-      path: '/posts/:sort?',
+      path: '/posts',
+      name: 'posts',
       component: () => import('@/views/posts/index.vue'),
+      redirect: { name: 'posts/default'  },
       children: [
-        { path: '', name: 'posts', component: () => import('@/views/posts/list/index.vue') },
-        { path: 'new', name: 'posts/new', component: () => import('@/views/posts/new/index.vue') }
+        { path: 'default', name: 'posts/default', component: () => import('@/views/posts/list/index.vue') },
+        { path: 'last', name: 'posts/last', component: () => import('@/views/posts/list/index.vue') },
+        { path: 'excellent', name: 'posts/excellent', component: () => import('@/views/posts/list/index.vue') },
+        { path: 'popular', name: 'posts/popular', component: () => import('@/views/posts/list/index.vue') },
+        { path: 'lastComment', name: 'posts/lastComment', component: () => import('@/views/posts/list/index.vue') },
+        { path: 'new', name: 'posts/new', component: () => import('@/views/posts/new/index.vue') },
+        { path: ':uuid', name: 'posts/show', component: () => import('@/views/posts/show/index.vue') }
       ]
     },
     {

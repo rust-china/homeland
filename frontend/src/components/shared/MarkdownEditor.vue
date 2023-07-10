@@ -1,10 +1,18 @@
 <script lang="tsx" setup>
 import { marked } from 'marked'
 import DOMPurify from 'isomorphic-dompurify';
+
 marked.use({
   mangle: false,
   headerIds: false,
 });
+// marked.use(markedHighlight({
+//   langPrefix: 'hljs language-',
+//   highlight(code, lang) {
+//     const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+//     return hljs.highlight(code, { language }).value;
+//   }
+// }));
 
 const props = defineProps({
   modelValue: {
@@ -23,10 +31,9 @@ const currentValue = computed({
 const htmlText = ref('')
 
 watchEffect(() => {
-  htmlText.value = DOMPurify.sanitize(marked.parse(
-    // eslint-disable-next-line no-misleading-character-class
-    currentValue.value.replace(/^[\u200B\u200C\u200D\u200E\u200F\uFEFF]/, '')
-  ))
+  // eslint-disable-next-line no-misleading-character-class
+  htmlText.value = DOMPurify.sanitize(marked.parse(currentValue.value.replace(/^[\u200B\u200C\u200D\u200E\u200F\uFEFF]/, '')))
+  console.log(111, htmlText.value)
 })
 
 </script>
@@ -43,7 +50,7 @@ watchEffect(() => {
       </t-tab-panel>
       <t-tab-panel value="second" label="预览">
         <div class="py-5">
-          <div class="preview flex-1" v-html="htmlText"></div>
+          <div class="preview flex-1 markdown-body" v-html="htmlText"></div>
         </div>
 
       </t-tab-panel>
@@ -51,4 +58,11 @@ watchEffect(() => {
   </main>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+@media (prefers-color-scheme: dark) {
+  @import "github-markdown-css/github-markdown-dark.css";
+}
+@media (prefers-color-scheme: light) {
+ @import "github-markdown-css/github-markdown-light.css";
+}
+</style>

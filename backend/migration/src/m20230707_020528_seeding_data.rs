@@ -18,6 +18,7 @@ impl MigrationTrait for Migration {
         }
         .insert(&transaction)
         .await?;
+
         category::ActiveModel {
             code: Set("RECRUIT".to_owned()),
             name: Set("招聘".to_owned()),
@@ -25,9 +26,18 @@ impl MigrationTrait for Migration {
         }
         .insert(&transaction)
         .await?;
+
         category::ActiveModel {
             code: Set("WIKI".to_owned()),
             name: Set("Wiki".to_owned()),
+            ..Default::default()
+        }
+        .insert(&transaction)
+        .await?;
+
+        category::ActiveModel {
+            code: Set("NoPoint".to_owned()),
+            name: Set("NoPoint".to_owned()),
             ..Default::default()
         }
         .insert(&transaction)

@@ -2,24 +2,27 @@
 import { useForm } from '@/utils/hooks/useForm';
 import CategoryCascader from '@/components/selects/CategoryCascader.vue'
 import MarkdownEditor from '@/components/shared/MarkdownEditor.vue'
-import { useMutation, gql } from '@/utils/graphql'
+import { graphqlApi } from '@/api'
 import { MessagePlugin } from 'tdesign-vue-next';
 
-const { mutate: createPost } = useMutation(gql`
-	mutation CreatePost($input: CreatePost!) {
-		createPost(input: $input)
-	}
-`)
-
+const router = useRouter()
 const formState = useForm({
   model: {
     body: ''
   },
   async onSubmit() {
-    await createPost?.({
-      input: formState.model
+    const {data: rData} = await graphqlApi({
+      query: `
+        mutation GPostCreate($input: GpostCreate!) {
+          postCreate(input: $input)
+        }
+      `,
+      variables: {
+        input: formState.model 
+      }
     })
     MessagePlugin.success("创建成功")
+    router.push({ name: 'posts/show', params: { uuid: rData.data.postCreate} })
   }
 })
 

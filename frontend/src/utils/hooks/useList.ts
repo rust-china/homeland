@@ -44,7 +44,7 @@ export function useList(params: ListParams = {}) {
         listState.query.pageSize = listState.pagination.pageSize
       }
 			try {
-				await params.onLoad?.(trimQuery(listState.query))
+				await params.onLoad(trimQuery(listState.query))
 			} finally {
 				listState.isLoading = false
 			}
@@ -57,7 +57,7 @@ export interface ListParams extends Record<string, any> {
 	urlQuery?: boolean;
 	query?: ListQuery;
 	pagination?: Partial<Pick<ListPagination, 'pageNo' | 'pageSize'>>;
-	onLoad?: (query: any) => Promise<void>;
+	onLoad: (query: any) => Promise<void>;
 	records?: any[];
 }
 

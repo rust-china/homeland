@@ -69,5 +69,7 @@ chrono = { workspace = true }
 once_cell = { workspace = true }
 slab = "0.4"
 
+pulldown-cmark = "0.9"
+
 sea-orm = { workspace = true } 
 entity = { workspace = true }

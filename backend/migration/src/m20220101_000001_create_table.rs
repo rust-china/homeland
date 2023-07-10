@@ -24,7 +24,7 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
-        let username_idx = sea_query::Index::create().name("idx-indexes-index2_attr").table(User::Table).col(User::Username).to_owned();
+        let username_idx = sea_query::Index::create().name("idx-user-username").table(User::Table).col(User::Username).to_owned();
         manager.create_index(username_idx).await?;
 
         manager
@@ -69,6 +69,9 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Post::Title).string().not_null())
                     .col(ColumnDef::new(Post::Body).text().not_null())
                     .col(ColumnDef::new(Post::Score).integer().not_null().default(0))
+                    .col(ColumnDef::new(Post::LikeCount).integer().not_null().default(0))
+                    .col(ColumnDef::new(Post::CommentCount).integer().not_null().default(0))
+                    .col(ColumnDef::new(Post::LastCommentAt).timestamp())
                     .col(ColumnDef::new(Post::ExtraData).json())
                     .col(ColumnDef::new(Post::DeletedAt).timestamp())
                     .col(ColumnDef::new(Post::CreatedAt).timestamp().default(Expr::current_timestamp()).not_null())
@@ -76,6 +79,8 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
+        let title_idx = sea_query::Index::create().name("idx-post-title").table(Post::Table).col(Post::Title).to_owned();
+        manager.create_index(title_idx).await?;
 
         manager
             .create_table(
@@ -187,6 +192,9 @@ enum Post {
     Title,
     Body,
     Score,
+    LikeCount,
+    CommentCount,
+    LastCommentAt,
     ExtraData,
     DeletedAt,
     CreatedAt,

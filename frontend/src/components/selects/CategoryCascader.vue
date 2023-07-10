@@ -1,13 +1,27 @@
 <script lang="tsx" setup>
-import { computed } from 'vue'
-import { useQuery, gql } from '@/utils/graphql'
+import { graphqlApi } from '@/api'
 
-const { result: queryCategories } = useQuery( gql`
-	query {
-		categories
-	}
-`)
-const categories = computed(() => queryCategories.value?.categories.data.map(item => ({ ...item, label: item.name, value: item.id })) ?? [])
+const categories = ref([])
+const fetchData = async () => {
+	const { data: rData } = await graphqlApi({
+		query: `
+			query {
+				categoryList {
+					records {
+						id,
+						name, 
+						code,
+					}
+				}
+			}
+		`
+	})
+	categories.value = rData.data.categoryList.records.map((item: { name: string; id: number; }) => ({ ...item, label: item.name, value: item.id }))
+}
+
+onMounted(() => {
+	fetchData()
+})
 </script>
 
 <template>

@@ -1,10 +1,10 @@
 <script lang="tsx" setup>
-import AsyncList from './AsyncList.vue'
+import AsyncShow from './AsyncShow.vue'
 </script>
 
 <template>
 	<Suspense>
-		<AsyncList />
+		<AsyncShow />
 	</Suspense>
 </template>
 

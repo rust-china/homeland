@@ -5,13 +5,13 @@ use entity::{category, prelude::*};
 pub struct CategoryQuery;
 #[Object]
 impl CategoryQuery {
-    pub async fn categories(
+    pub async fn category_list(
         &self,
         ctx: &Context<'_>,
         #[graphql(default)] ancestry: Option<String>,
         #[graphql(default = 1)] page_no: u64,
         #[graphql(default = 20)] page_size: u64,
-    ) -> Result<serde_json::Value> {
+    ) -> Result<GCategoryList> {
         let state = ctx.data::<crate::AppState>()?;
 
         let mut condition = Condition::all().add(category::Column::Ancestry.is_null());
@@ -19,19 +19,31 @@ impl CategoryQuery {
             condition = condition.add(category::Column::Ancestry.contains(&ancestry));
         }
         let category_paginator = Category::find().filter(condition).paginate(&state.db_conn, page_size);
-        let page_categories = category_paginator.fetch_page(page_no - 1).await?;
-        let mut map = serde_json::Map::new();
-        map.insert("total_count".into(), category_paginator.num_items().await?.into());
-        map.insert("total_page".into(), category_paginator.num_pages().await?.into());
-        map.insert("cur_page".into(), page_no.into());
-        map.insert("page_size".into(), page_size.into());
-        map.insert("data".into(), serde_json::json!(page_categories));
+        let mut pagination: super::GPagination = category_paginator.num_items_and_pages().await?.into();
+        pagination.page_no = Some(page_no);
+        pagination.page_size = Some(page_size);
 
-        Ok(serde_json::Value::Object(map))
+        let page_category_list = category_paginator
+            .fetch_page(page_no - 1)
+            .await?
+            .into_iter()
+            .map(|model| GCategory {
+                id: model.id,
+                name: model.name,
+                code: model.code,
+                created_at: model.created_at,
+                updated_at: model.updated_at,
+            })
+            .collect();
+
+        Ok(GCategoryList {
+            records: page_category_list,
+            pagination,
+        })
     }
-    pub async fn category(&self, ctx: &Context<'_>, id: i32) -> Result<serde_json::Value> {
+    pub async fn category(&self, ctx: &Context<'_>, id: i32) -> Result<GCategory> {
         let state = ctx.data::<crate::AppState>()?;
-        let db_category = Category::find()
+        let g_category = Category::find()
             .select_only()
             .columns([
                 category::Column::Id,
@@ -41,34 +53,19 @@ impl CategoryQuery {
                 category::Column::UpdatedAt,
             ])
             .filter(category::Column::Id.eq(id))
-            .into_json()
+            .into_model::<GCategory>()
             .one(&state.db_conn)
             .await?
             .ok_or_else(|| Error::new_with_source(crate::Error::Message("category not exists".into())))?;
-        Ok(db_category)
+        Ok(g_category)
     }
-}
-
-#[derive(InputObject)]
-pub struct CreateCategory {
-    code: String,
-    name: String,
-    parent_id: i32,
-}
-
-#[derive(InputObject)]
-pub struct UpdateCategory {
-    id: i32,
-    code: String,
-    name: String,
-    parent_id: Option<i32>,
 }
 
 #[derive(Default)]
 pub struct CategoryMutation;
 #[Object]
 impl CategoryMutation {
-    pub async fn create_category(&self, ctx: &Context<'_>, input: CreateCategory) -> Result<i32> {
+    pub async fn category_create(&self, ctx: &Context<'_>, input: GCategoryCreate) -> Result<i32> {
         let state = ctx.data::<crate::AppState>()?;
         let claims = ctx
             .data::<Option<crate::serve::jwt::Claims>>()?
@@ -91,7 +88,7 @@ impl CategoryMutation {
         let category: category::Model = category.insert(&state.db_conn).await?;
         Ok(category.id)
     }
-    pub async fn update_category(&self, ctx: &Context<'_>, input: UpdateCategory) -> Result<bool> {
+    pub async fn category_update(&self, ctx: &Context<'_>, input: GCategoryUpdate) -> Result<bool> {
         let state = ctx.data::<crate::AppState>()?;
         let claims = ctx
             .data::<Option<crate::serve::jwt::Claims>>()?
@@ -117,7 +114,7 @@ impl CategoryMutation {
         let _category: category::Model = category.update(&state.db_conn).await?;
         Ok(true)
     }
-    pub async fn delete_category(&self, ctx: &Context<'_>, id: i32) -> Result<bool> {
+    pub async fn category_delete(&self, ctx: &Context<'_>, id: i32) -> Result<bool> {
         let state = ctx.data::<crate::AppState>()?;
         let claims = ctx
             .data::<Option<crate::serve::jwt::Claims>>()?
@@ -133,4 +130,34 @@ impl CategoryMutation {
         let ret = category.delete(&state.db_conn).await?;
         Ok(ret.rows_affected > 0)
     }
+}
+
+#[derive(SimpleObject, FromQueryResult)]
+pub struct GCategory {
+    id: i32,
+    name: String,
+    code: String,
+    updated_at: chrono::NaiveDateTime,
+    created_at: chrono::NaiveDateTime,
+}
+
+#[derive(SimpleObject)]
+pub struct GCategoryList {
+    records: Vec<GCategory>,
+    pagination: super::GPagination,
+}
+
+#[derive(InputObject)]
+pub struct GCategoryCreate {
+    code: String,
+    name: String,
+    parent_id: i32,
+}
+
+#[derive(InputObject)]
+pub struct GCategoryUpdate {
+    id: i32,
+    code: String,
+    name: String,
+    parent_id: Option<i32>,
 }

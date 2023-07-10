@@ -37,11 +37,34 @@ use std::{
     task::{Context, Poll},
 };
 use tokio::sync::mpsc::{self, UnboundedReceiver, UnboundedSender};
-use tokio_stream::{Stream};
+use tokio_stream::Stream;
 
+/**
+ * Paginate
+ */
+#[derive(SimpleObject)]
+struct GPagination {
+    total_count: u64,
+    total_page: u64,
+    page_no: Option<u64>,
+    page_size: Option<u64>,
+}
+impl From<sea_orm::ItemsAndPagesNumber> for GPagination {
+    fn from(value: sea_orm::ItemsAndPagesNumber) -> Self {
+        Self {
+            total_count: value.number_of_items,
+            total_page: value.number_of_pages,
+            page_no: None,
+            page_size: None,
+        }
+    }
+}
+
+/**
+ * SimpleBroker
+ */
 static SUBSCRIBERS: Lazy<Mutex<HashMap<TypeId, Box<dyn Any + Send>>>> = Lazy::new(Default::default);
 pub struct Senders<T>(Slab<UnboundedSender<T>>);
-
 struct BrokerStream<T: Sync + Send + Clone + 'static>(usize, UnboundedReceiver<T>);
 impl<T: Sync + Send + Clone + 'static> Stream for BrokerStream<T> {
     type Item = T;
@@ -50,7 +73,6 @@ impl<T: Sync + Send + Clone + 'static> Stream for BrokerStream<T> {
         self.1.poll_recv(cx)
     }
 }
-
 pub struct SimpleBroker<T>(PhantomData<T>);
 impl<T: Sync + Send + Clone + 'static> SimpleBroker<T> {
     pub fn publish(msg: T) {

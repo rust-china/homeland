@@ -13,8 +13,12 @@ pub struct Model {
     pub user_id: i32,
     pub category_id: i32,
     pub title: String,
+    #[sea_orm(column_type = "Text")]
     pub body: String,
     pub score: i32,
+    pub like_count: i32,
+    pub comment_count: i32,
+    pub last_comment_at: Option<DateTime>,
     pub extra_data: Option<Json>,
     pub deleted_at: Option<DateTime>,
     pub created_at: DateTime,
@@ -80,7 +84,7 @@ impl ActiveModelBehavior for ActiveModel {
 }
 
 impl Entity {
-    pub fn find_by_uuid(uuid: &str) -> Select<Entity> {
+    pub fn find_by_uuid(uuid: Uuid) -> Select<Entity> {
         Self::find().filter(Column::Uuid.eq(uuid))
     }
 }

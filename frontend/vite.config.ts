@@ -30,6 +30,23 @@ export default defineConfig({
       '@': resolve(__dirname, './src')
     }
   },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        charset: false,
+        // additionalData: `$injectedColor: orange;`
+        additionalData: '@import "@/assets/stylesheets/globalInjectedData.scss";'
+      }
+      // less: {
+      //   modifyVars: {
+      //     '@primary-color': '#1990EB',
+      //     hack: `true; @import "@import "@/assets/stylesheets/globalInjectedData.less";`
+      //   },
+      //   javascriptEnabled: true,
+      // }
+    }
+    // postcss: {}
+  },
   build: {
     rollupOptions: {
       output:{

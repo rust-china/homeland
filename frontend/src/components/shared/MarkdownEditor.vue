@@ -1,5 +1,6 @@
 <script lang="tsx" setup>
 import { marked } from 'marked'
+import 'github-markdown-css/github-markdown.css'
 import DOMPurify from 'isomorphic-dompurify';
 
 marked.use({
@@ -59,10 +60,4 @@ watchEffect(() => {
 </template>
 
 <style lang="scss" scoped>
-@media (prefers-color-scheme: dark) {
-  @import "github-markdown-css/github-markdown-dark.css";
-}
-@media (prefers-color-scheme: light) {
- @import "github-markdown-css/github-markdown-light.css";
-}
 </style>

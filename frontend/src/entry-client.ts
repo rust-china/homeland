@@ -19,3 +19,14 @@ if (window.__SSR_STATE__) {
 		pinia.state.value = ssrState.piniaState
 	}
 }
+
+
+const setThemeMode = () => {
+	if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+		document.documentElement.setAttribute('theme-mode', 'dark');
+	} else {
+		document.documentElement.setAttribute('theme-mode', 'light');
+	}
+}
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', setThemeMode)
+setThemeMode()

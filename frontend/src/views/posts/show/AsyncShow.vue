@@ -1,6 +1,7 @@
 <script lang="tsx">
 import { graphqlApi } from '@/api'
 import DOMPurify from 'isomorphic-dompurify';
+import 'github-markdown-css/github-markdown.css'
 
 export default defineComponent({
 	async setup(_ctx) {
@@ -73,12 +74,6 @@ export default defineComponent({
 </template>
 
 <style lang="scss" scoped>
-@media (prefers-color-scheme: dark) {
-  @import "github-markdown-css/github-markdown-dark.css";
-}
-@media (prefers-color-scheme: light) {
- @import "github-markdown-css/github-markdown-light.css";
-}
 .card {
 	@apply border-none bg-white shadow-sm sm:rounded-lg;
 	@apply bg-white;

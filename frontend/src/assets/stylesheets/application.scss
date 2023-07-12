@@ -30,3 +30,14 @@ body {
 .main-container {
   @apply max-w-7xl mx-auto;
 }
+
+.card {
+	@apply border-none bg-white shadow-sm sm:rounded-lg;
+	@apply bg-white;
+	@apply dark:bg-gray-900 dark:border dark:border-solid dark:border-gray-800;
+
+	.html-render {
+		background-color: transparent;
+    // padding: 15px;
+	}
+}

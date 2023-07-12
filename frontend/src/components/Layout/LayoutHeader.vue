@@ -117,7 +117,7 @@ onMounted(() => {
 	.tabs {
 		.tab-item {
 			&.active {
-				@apply font-bold underline underline-offset-4;
+				@apply font-bold;
 			}
 		}
 	}

@@ -51,9 +51,7 @@ export default defineConfig({
     rollupOptions: {
       output:{
         manualChunks: {
-          'highlight.js': ['highlight.js', 'github-markdown-css'],
-          'marked': ['marked'],
-          'lodash-es': ['lodash-es'],
+          // 'lodash-es': ['lodash-es'],
         }
       }
     }

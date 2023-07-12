@@ -28,5 +28,5 @@ const setThemeMode = () => {
 		document.documentElement.setAttribute('theme-mode', 'light');
 	}
 }
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', setThemeMode)
+window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', setThemeMode)
 setThemeMode()

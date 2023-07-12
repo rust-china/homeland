@@ -2,7 +2,7 @@ import type { UnwrapNestedRefs } from 'vue'
 import { trimQuery } from '@/utils/libs'
 
 const DEFAULT_PAGE_SIZE = 20
-export function useList(params: ListParams = {}) {
+export function useList(params: ListParams) {
 	const listState: UnwrapNestedRefs<List> = reactive<List>({
 		...params,
 		urlQuery: params.urlQuery ?? false,
@@ -57,7 +57,7 @@ export interface ListParams extends Record<string, any> {
 	urlQuery?: boolean;
 	query?: ListQuery;
 	pagination?: Partial<Pick<ListPagination, 'pageNo' | 'pageSize'>>;
-	onLoad: (query: any) => Promise<void>;
+	onLoad: (query?: any) => Promise<void>;
 	records?: any[];
 }
 

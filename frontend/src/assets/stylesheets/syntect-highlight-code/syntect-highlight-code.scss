@@ -1,0 +1,4 @@
+@import "./syntect-highlight-code-light.scss";
+@media (prefers-color-scheme: dark) {
+  @import "./syntect-highlight-code-dark.scss";
+}

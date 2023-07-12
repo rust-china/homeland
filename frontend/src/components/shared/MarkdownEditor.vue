@@ -2,18 +2,20 @@
 import { marked } from 'marked'
 import 'github-markdown-css/github-markdown.css'
 import DOMPurify from 'isomorphic-dompurify';
+import {markedHighlight} from "marked-highlight";
+import hljs from 'highlight.js'
 
 marked.use({
   mangle: false,
   headerIds: false,
 });
-// marked.use(markedHighlight({
-//   langPrefix: 'hljs language-',
-//   highlight(code, lang) {
-//     const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-//     return hljs.highlight(code, { language }).value;
-//   }
-// }));
+marked.use(markedHighlight({
+  langPrefix: 'hljs language-',
+  highlight(code, lang) {
+    const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+    return hljs.highlight(code, { language }).value;
+  }
+}));
 
 const props = defineProps({
   modelValue: {
@@ -34,7 +36,6 @@ const htmlText = ref('')
 watchEffect(() => {
   // eslint-disable-next-line no-misleading-character-class
   htmlText.value = DOMPurify.sanitize(marked.parse(currentValue.value.replace(/^[\u200B\u200C\u200D\u200E\u200F\uFEFF]/, '')))
-  console.log(111, htmlText.value)
 })
 
 </script>
@@ -59,5 +60,9 @@ watchEffect(() => {
   </main>
 </template>
 
-<style lang="scss" scoped>
-</style>
+<style lang="scss">
+@import 'highlight.js/scss/github.scss';
+html[theme-mode=dark] {
+  @import 'highlight.js/scss/github-dark.scss';
+}
+</style> 

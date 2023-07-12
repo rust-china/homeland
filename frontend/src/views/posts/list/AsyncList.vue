@@ -1,6 +1,7 @@
 <script lang="tsx">
 import { useList } from '@/utils/hooks/useList'
 import { graphqlApi } from '@/api'
+import dayjs from 'dayjs'
 
 export default defineComponent({
 	async setup(_ctx) {
@@ -22,6 +23,8 @@ export default defineComponent({
 								records {
 									uuid,
 									title,
+									user,
+									category,
 									updatedAt,
 									createdAt,
 								},
@@ -50,7 +53,7 @@ export default defineComponent({
 		watch(() => route.name, async () => {
 			await listState.onLoad()
 		}, { immediate: false })
-		return { route, router, listState }
+		return { dayjs, route, router, listState }
 	}
 })
 
@@ -81,9 +84,20 @@ export default defineComponent({
 						<t-list :split="true">
 							<template v-for="post in listState.records" :key="post.uuid">
 								<t-list-item>
-									<t-list-item-meta :description="JSON.stringify(post)">
+									<t-list-item-meta>
 										<template #title>
-											<RouterLink :to="{ name: 'posts/show', params: { uuid: post.uuid } }">{{ post.title }}</RouterLink>
+											<RouterLink :to="{ name: 'posts/show', params: { uuid: post.uuid } }">
+												<t-space size="small">
+													<span class="opacity-50">{{ post.category.name }}</span>
+													{{ post.title }}
+												</t-space>
+											</RouterLink>
+										</template>
+										<template #description>
+											<t-space size="small">
+												<span class="opacity-30">{{ post.user.name || post.user.username }}</span>
+												<span class="opacity-70">最后更新于：{{ dayjs(post.updatedAt).format('YYYY-MM-DD HH:mm:ss') }}</span>
+											</t-space>
 										</template>
 									</t-list-item-meta>
 								</t-list-item>
@@ -94,12 +108,12 @@ export default defineComponent({
 				</div>
 				<div class="w-full lg:w-1/4">
 					<div class="mb-4">
-						<t-card>
+						<t-card class="card">
 							<t-button block theme="primary" variant="base" @click="router.push({ name: 'posts/new' })">发布新帖子</t-button>
 						</t-card>
 					</div>
 					<div class="mb-4">
-						<t-card title="小贴士" header-bordered>
+						<t-card title="小贴士" header-bordered class="card">
 							<p>管理员会定期检查帖子，发现有描述不清晰，或者不知道说什么的帖子移动到「NoPoint」节点，此节点永远不会上首页，如果你发现你的帖子进入了「NoPoint」里面，请检查调整你的标题和内容。</p>
 						</t-card>
 					</div>
@@ -122,9 +136,13 @@ export default defineComponent({
 	}
 }
 
-.card {
-	@apply border-none bg-white shadow-sm sm:rounded-lg;
-	@apply bg-white;
-	@apply dark:bg-gray-900 dark:border dark:border-solid dark:border-gray-800;
+.t-list-item {
+	background-color: transparent;
+}
+
+.t-pagination {
+	::v-deep(.t-pagination__jump) {
+		background-color: transparent;
+	}
 }
 </style>

@@ -10,7 +10,7 @@ use async_graphql::*;
 pub struct AppQuery(health::HealthQuery, auth::AuthQuery, category::CategoryQuery, post::PostQuery);
 
 #[derive(Default, MergedObject)]
-pub struct AppMutation(auth::AuthMutation, category::CategoryMutation, post::PostMutation);
+pub struct AppMutation(auth::AuthMutation/*, category::CategoryMutation */, post::PostMutation);
 
 #[derive(Default, MergedSubscription)]
 pub struct AppSubscription(post::PostSubscription);

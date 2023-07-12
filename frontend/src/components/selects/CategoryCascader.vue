@@ -1,7 +1,8 @@
 <script lang="tsx" setup>
 import { graphqlApi } from '@/api'
+import { buildTree } from '@/utils/libs'
 
-const categories = ref([])
+const categories = ref<any>([])
 const fetchData = async () => {
 	const { data: rData } = await graphqlApi({
 		query: `
@@ -11,12 +12,14 @@ const fetchData = async () => {
 						id,
 						name, 
 						code,
+						parentId,
 					}
 				}
 			}
 		`
 	})
-	categories.value = rData.data.categoryList.records.map((item: { name: string; id: number; }) => ({ ...item, label: item.name, value: item.id }))
+	const categoires = rData.data.categoryList.records.map((item: { name: string; id: number; }) => ({ ...item, label: item.name, value: item.id }))
+	categories.value = buildTree(categoires)
 }
 
 onMounted(() => {

@@ -54,7 +54,7 @@ impl ActiveModelBehavior for ActiveModel {
 }
 
 impl ActiveModel {
-    pub fn set_parent(&mut self, parent: Option<Model>) {
+    pub fn set_parent(&mut self, parent: Option<&Model>) {
         if let Some(parent) = parent {
             let mut ancestry = "".to_owned();
             if let Some(parent_ancestry) = &parent.ancestry {
@@ -65,5 +65,19 @@ impl ActiveModel {
         } else {
             self.ancestry = Set(None);
         }
+    }
+}
+
+impl Model {
+    pub fn parent_id(&self) -> Option<i32> {
+        if let Some(ancestry) = &self.ancestry {
+            let last = ancestry.split("/").last();
+            if let Some(last) = last {
+                if let Ok(value) = last.parse::<i32>() {
+                    return Some(value)
+                }
+            }
+        }
+        None
     }
 }

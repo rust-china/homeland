@@ -53,7 +53,7 @@ impl Related<super::user::Entity> for Entity {
 impl ActiveModelBehavior for ActiveModel {}
 
 impl ActiveModel {
-    pub fn set_parent(&mut self, parent: Option<Model>) {
+    pub fn set_parent(&mut self, parent: Option<&Model>) {
         if let Some(parent) = parent {
             let mut ancestry = "".to_owned();
             if let Some(parent_ancestry) = &parent.ancestry {

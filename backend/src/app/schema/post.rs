@@ -1,5 +1,5 @@
 use async_graphql::*;
-use entity::{post, prelude::*, user};
+use entity::{category, post, prelude::*, user};
 // use futures_util::StreamExt;
 use std::time::Duration;
 use tokio_stream::{Stream, StreamExt};
@@ -40,6 +40,7 @@ impl PostQuery {
                 title: model.title,
                 body: None,
                 user_id: model.user_id,
+                category_id: model.category_id,
                 like_count: model.like_count,
                 comment_count: model.comment_count,
                 last_comment_at: model.last_comment_at,
@@ -65,6 +66,7 @@ impl PostQuery {
             title: model.title,
             body: Some(model.body),
             user_id: model.user_id,
+            category_id: model.category_id,
             like_count: model.like_count,
             comment_count: model.comment_count,
             last_comment_at: model.last_comment_at,
@@ -202,6 +204,7 @@ pub struct GPost {
     #[graphql(skip)]
     body: Option<String>,
     user_id: i32,
+    category_id: i32,
     like_count: i32,
     comment_count: i32,
     last_comment_at: Option<chrono::NaiveDateTime>,
@@ -223,13 +226,10 @@ impl GPost {
     }
     async fn body_html(&self) -> String {
         if let Some(body) = &self.body {
-            let parser = pulldown_cmark::Parser::new(body);
-            let mut html_output = String::new();
-            pulldown_cmark::html::push_html(&mut html_output, parser);
-            html_output
-        } else {
-            "".to_string()
+            return ::backend::markdown::render_markdown(body);
+            // return ::backend::markdown::render_markdown_highlight_class(body).unwrap_or("".into())
         }
+        "".to_string()
     }
     async fn user(&self, ctx: &Context<'_>) -> Result<serde_json::Value> {
         let state = ctx.data::<crate::AppState>()?;
@@ -248,6 +248,24 @@ impl GPost {
             .await?
             .ok_or_else(|| crate::Error::Message("user not exists".into()))?;
         Ok(db_user)
+    }
+    async fn category(&self, ctx: &Context<'_>) -> Result<serde_json::Value> {
+        let state = ctx.data::<crate::AppState>()?;
+        let json = Category::find()
+            .select_only()
+            .columns([
+                category::Column::Id,
+                category::Column::Name,
+                category::Column::Code,
+                category::Column::CreatedAt,
+                category::Column::UpdatedAt,
+            ])
+            .filter(category::Column::Id.eq(self.category_id))
+            .into_json()
+            .one(&state.db_conn)
+            .await?
+            .ok_or_else(|| crate::Error::Message("category not exists".into()))?;
+        Ok(json)
     }
 }
 

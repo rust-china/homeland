@@ -2,11 +2,13 @@
 import { graphqlApi } from '@/api'
 import DOMPurify from 'isomorphic-dompurify';
 import 'github-markdown-css/github-markdown.css'
+// import '@/assets/stylesheets/syntect-highlight-code/syntect-highlight-code.scss'
+import hljs from 'highlight.js'
+import dayjs from 'dayjs'
 
 export default defineComponent({
 	async setup(_ctx) {
 		const route = useRoute();
-		console.log('setup', route.name)
 		const post = ref<any>(null)
 		const fetchPost = async () => {
 			const { data: rData } = await graphqlApi({
@@ -16,6 +18,7 @@ export default defineComponent({
 							uuid,
 							title,
 							user,
+							category,
 							bodyHtml,
 							updatedAt,
 							createdAt,
@@ -36,7 +39,10 @@ export default defineComponent({
 		}
 
 		await fetchPost()
-		return { route, post }
+		return { dayjs, route, post }
+	},
+	mounted() {
+		hljs.highlightAll()
 	}
 })
 </script>
@@ -51,19 +57,22 @@ export default defineComponent({
 							{{ post?.title }}
 						</template>
 						<template #description>
-							{{ post?.user }}
+							<t-space size="small">
+								<span class="opacity-50">{{ post.user.name || post.user.username }}</span>
+								<span>最后更新于：{{ dayjs(post.updatedAt).format('YYYY-MM-DD HH:mm:ss') }}</span>
+							</t-space>
 						</template>
 						<div class="html-render markdown-body" v-html="post?.bodyHtml"></div>
 					</t-card>
 				</div>
 				<div class="w-full lg:w-1/4">
 					<div class="mb-4">
-						<t-card>
+						<t-card class="card">
 							{{ post?.user }}
 						</t-card>
 					</div>
 					<div class="mb-4">
-						<t-card>
+						<t-card class="card">
 							点赞
 						</t-card>
 					</div>
@@ -73,10 +82,10 @@ export default defineComponent({
 	</main>
 </template>
 
-<style lang="scss" scoped>
-.card {
-	@apply border-none bg-white shadow-sm sm:rounded-lg;
-	@apply bg-white;
-	@apply dark:bg-gray-900 dark:border dark:border-solid dark:border-gray-800;
+
+<style lang="scss">
+@import 'highlight.js/scss/github.scss';
+html[theme-mode=dark] {
+  @import 'highlight.js/scss/github-dark.scss';
 }
-</style>
+</style> 

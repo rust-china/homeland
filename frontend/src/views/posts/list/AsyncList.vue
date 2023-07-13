@@ -18,7 +18,7 @@ export default defineComponent({
 			async onLoad() {
 				const { data: rData } = await graphqlApi({
 					query: `
-						query PostListQuery($query: GpostListQuery!) {
+						query PostListQuery($query: GraPostListQuery!) {
 							postList(query: $query) {
 								records {
 									uuid,

@@ -1,5 +1,6 @@
 import type { InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios'
 import axios from 'axios'
+import { MessagePlugin } from 'tdesign-vue-next';
 
 // 创建 apiAxios 实例
 const apiAxios = new Proxy(
@@ -29,6 +30,10 @@ apiAxios.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 
 apiAxios.interceptors.response.use(
   (response: AxiosResponse<any>) => {
+    if (response.data.errors instanceof Array) {
+      MessagePlugin.error(response.data.errors.map((err: Error) => err.message).join('\n'))
+      return Promise.reject(response.data.errors)
+    }
     return Promise.resolve(response)
   },
   (error: AxiosError) => {

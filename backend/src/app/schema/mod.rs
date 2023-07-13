@@ -22,7 +22,7 @@ pub fn build_schema() -> AppSchema {
         .extension(Analyzer) // 启用 Analyzer 扩展
         .extension(ApolloTracing) // 启用 ApolloTracing 扩展
         // .limit_depth(5) // 深度 限制最大深度为 5
-        // .limit_complexity(5) // 复杂度 限制最大深度为 5
+        // .limit_complexity(30) // 复杂度 限制最大深度为 30
         .finish()
 }
 
@@ -43,13 +43,13 @@ use tokio_stream::Stream;
  * Paginate
  */
 #[derive(SimpleObject)]
-struct GPagination {
+struct GraPagination {
     total_count: u64,
     total_page: u64,
     page_no: Option<u64>,
     page_size: Option<u64>,
 }
-impl From<sea_orm::ItemsAndPagesNumber> for GPagination {
+impl From<sea_orm::ItemsAndPagesNumber> for GraPagination {
     fn from(value: sea_orm::ItemsAndPagesNumber) -> Self {
         Self {
             total_count: value.number_of_items,

@@ -20,7 +20,7 @@ impl CategoryQuery {
             condition = condition.add(category::Column::Ancestry.contains(&ancestry));
         }
         let category_paginator = Category::find().filter(condition).paginate(&state.db_conn, page_size);
-        let mut pagination: super::GPagination = category_paginator.num_items_and_pages().await?.into();
+        let mut pagination: super::GraPagination = category_paginator.num_items_and_pages().await?.into();
         pagination.page_no = Some(page_no);
         pagination.page_size = Some(page_size);
 
@@ -28,7 +28,7 @@ impl CategoryQuery {
             .fetch_page(page_no - 1)
             .await?
             .into_iter()
-            .map(|model| GCategory {
+            .map(|model| GraCategory {
                 parent_id: model.parent_id(),
                 id: model.id,
                 name: model.name,
@@ -44,7 +44,7 @@ impl CategoryQuery {
             pagination,
         })
     }
-    pub async fn category(&self, ctx: &Context<'_>, id: i32) -> Result<GCategory> {
+    pub async fn category(&self, ctx: &Context<'_>, id: i32) -> Result<GraCategory> {
         let state = ctx.data::<crate::AppState>()?;
         let g_category = Category::find()
             .select_only()
@@ -56,7 +56,7 @@ impl CategoryQuery {
                 category::Column::UpdatedAt,
             ])
             .filter(category::Column::Id.eq(id))
-            .into_model::<GCategory>()
+            .into_model::<GraCategory>()
             .one(&state.db_conn)
             .await?
             .ok_or_else(|| Error::new_with_source(crate::Error::Message("category not exists".into())))?;
@@ -68,7 +68,7 @@ impl CategoryQuery {
 // pub struct CategoryMutation;
 // #[Object]
 // impl CategoryMutation {
-//     pub async fn category_create(&self, ctx: &Context<'_>, input: GCategoryCreate) -> Result<i32> {
+//     pub async fn category_create(&self, ctx: &Context<'_>, input: GraCategoryCreate) -> Result<i32> {
 //         let state = ctx.data::<crate::AppState>()?;
 //         let claims = ctx
 //             .data::<Option<crate::serve::jwt::Claims>>()?
@@ -91,7 +91,7 @@ impl CategoryQuery {
 //         let category: category::Model = category.insert(&state.db_conn).await?;
 //         Ok(category.id)
 //     }
-//     pub async fn category_update(&self, ctx: &Context<'_>, input: GCategoryUpdate) -> Result<bool> {
+//     pub async fn category_update(&self, ctx: &Context<'_>, input: GraCategoryUpdate) -> Result<bool> {
 //         let state = ctx.data::<crate::AppState>()?;
 //         let claims = ctx
 //             .data::<Option<crate::serve::jwt::Claims>>()?
@@ -136,7 +136,7 @@ impl CategoryQuery {
 // }
 
 #[derive(SimpleObject, FromQueryResult)]
-pub struct GCategory {
+pub struct GraCategory {
     id: i32,
     name: String,
     code: String,
@@ -148,19 +148,19 @@ pub struct GCategory {
 
 #[derive(SimpleObject)]
 pub struct GCategoryList {
-    records: Vec<GCategory>,
-    pagination: super::GPagination,
+    records: Vec<GraCategory>,
+    pagination: super::GraPagination,
 }
 
 // #[derive(InputObject)]
-// pub struct GCategoryCreate {
+// pub struct GraCategoryCreate {
 //     code: String,
 //     name: String,
 //     parent_id: i32,
 // }
 
 // #[derive(InputObject)]
-// pub struct GCategoryUpdate {
+// pub struct GraCategoryUpdate {
 //     id: i32,
 //     code: String,
 //     name: String,

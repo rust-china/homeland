@@ -27,7 +27,8 @@ const router = createRouter({
         { path: 'excellent', name: 'posts/excellent', component: () => import('@/views/posts/list/index.vue') },
         { path: 'popular', name: 'posts/popular', component: () => import('@/views/posts/list/index.vue') },
         { path: 'lastComment', name: 'posts/lastComment', component: () => import('@/views/posts/list/index.vue') },
-        { path: 'new', name: 'posts/new', component: () => import('@/views/posts/new/index.vue') },
+        { path: 'new', name: 'posts/new', component: () => import('@/views/posts/form/index.vue') },
+        { path: 'edit/:uuid', name: 'posts/edit', component: () => import('@/views/posts/form/index.vue') },
         { path: ':uuid', name: 'posts/show', component: () => import('@/views/posts/show/index.vue') }
       ]
     },

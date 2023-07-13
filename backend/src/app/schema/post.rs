@@ -10,7 +10,7 @@ use super::SimpleBroker;
 pub struct PostQuery;
 #[Object]
 impl PostQuery {
-    pub async fn post_list(&self, ctx: &Context<'_>, query: GPostListQuery) -> Result<GPostList> {
+    pub async fn post_list(&self, ctx: &Context<'_>, query: GraPostListQuery) -> Result<GraPostList> {
         let state = ctx.data::<crate::AppState>()?;
 
         let mut condition = Condition::all();
@@ -19,15 +19,15 @@ impl PostQuery {
         }
         let mut post_list = Post::find().filter(condition);
         match query.sort {
-            Some(sort) if sort == GPostSort::Last => post_list = post_list.order_by_desc(post::Column::CreatedAt),
-            Some(sort) if sort == GPostSort::Excellent => post_list = post_list.order_by_desc(post::Column::Score),
-            Some(sort) if sort == GPostSort::Popular => post_list = post_list.order_by_desc(post::Column::CommentCount),
-            Some(sort) if sort == GPostSort::LastComment => post_list = post_list.order_by_desc(post::Column::LastCommentAt),
+            Some(sort) if sort == GraPostSort::Last => post_list = post_list.order_by_desc(post::Column::CreatedAt),
+            Some(sort) if sort == GraPostSort::Excellent => post_list = post_list.order_by_desc(post::Column::Score),
+            Some(sort) if sort == GraPostSort::Popular => post_list = post_list.order_by_desc(post::Column::CommentCount),
+            Some(sort) if sort == GraPostSort::LastComment => post_list = post_list.order_by_desc(post::Column::LastCommentAt),
             _ => (),
         }
 
         let post_paginator = post_list.paginate(&state.db_conn, query.page_size);
-        let mut pagination: super::GPagination = post_paginator.num_items_and_pages().await?.into();
+        let mut pagination: super::GraPagination = post_paginator.num_items_and_pages().await?.into();
         pagination.page_no = Some(query.page_no);
         pagination.page_size = Some(query.page_size);
 
@@ -35,7 +35,7 @@ impl PostQuery {
             .fetch_page(query.page_no - 1)
             .await?
             .into_iter()
-            .map(|model| GPost {
+            .map(|model| GraPost {
                 uuid: model.uuid.to_string(),
                 title: model.title,
                 body: None,
@@ -49,19 +49,19 @@ impl PostQuery {
             })
             .collect();
 
-        Ok(GPostList {
+        Ok(GraPostList {
             records: page_post_list,
             pagination,
         })
     }
-    pub async fn post(&self, ctx: &Context<'_>, uuid: String) -> Result<GPost> {
+    pub async fn post(&self, ctx: &Context<'_>, uuid: String) -> Result<GraPost> {
         let state = ctx.data::<crate::AppState>()?;
         let uuid = Uuid::parse_str(&uuid)?;
         let model = Post::find_by_uuid(uuid)
             .one(&state.db_conn)
             .await?
             .ok_or_else(|| Error::new_with_source(crate::Error::Message("post not exists".into())))?;
-        Ok(GPost {
+        Ok(GraPost {
             uuid: model.uuid.to_string(),
             title: model.title,
             body: Some(model.body),
@@ -80,7 +80,7 @@ impl PostQuery {
 pub struct PostMutation;
 #[Object]
 impl PostMutation {
-    pub async fn post_create(&self, ctx: &Context<'_>, input: GPostCreate) -> Result<String> {
+    pub async fn post_create(&self, ctx: &Context<'_>, input: GraPostCreate) -> Result<String> {
         let state = ctx.data::<crate::AppState>()?;
         let claims = ctx
             .data::<Option<crate::serve::jwt::Claims>>()?
@@ -96,14 +96,14 @@ impl PostMutation {
         };
         let post: post::Model = post.insert(&state.db_conn).await?;
 
-        SimpleBroker::publish(GSPostChange {
+        SimpleBroker::publish(GraSPostChange {
             mutation_type: MutationType::Created,
             uuid: post.uuid.to_string(),
         });
 
         Ok(post.uuid.to_string())
     }
-    pub async fn post_update(&self, ctx: &Context<'_>, input: GPostUpdate) -> Result<bool> {
+    pub async fn post_update(&self, ctx: &Context<'_>, input: GraPostUpdate) -> Result<bool> {
         let state = ctx.data::<crate::AppState>()?;
         let claims = ctx
             .data::<Option<crate::serve::jwt::Claims>>()?
@@ -124,9 +124,10 @@ impl PostMutation {
         post.category_id = Set(input.category_id);
         post.title = Set(input.title);
         post.body = Set(input.body);
+        post.updated_at = Set(chrono::Utc::now().naive_utc());
         let post: post::Model = post.update(&state.db_conn).await?;
 
-        SimpleBroker::publish(GSPostChange {
+        SimpleBroker::publish(GraSPostChange {
             mutation_type: MutationType::Updated,
             uuid: post.uuid.to_string(),
         });
@@ -151,7 +152,7 @@ impl PostMutation {
             .ok_or_else(|| Error::new_with_source(crate::Error::Message("no post".into())))?;
         let ret = post.delete(&state.db_conn).await?;
 
-        SimpleBroker::publish(GSPostChange {
+        SimpleBroker::publish(GraSPostChange {
             mutation_type: MutationType::Updated,
             uuid,
         });
@@ -173,13 +174,13 @@ impl PostSubscription {
             value
         })
     }
-    pub async fn post_change(&self, uuids: Option<Vec<String>>) -> impl Stream<Item = GSPostChange> {
-        SimpleBroker::<GSPostChange>::subscribe().filter(move |event| if let Some(uuids) = &uuids { uuids.contains(&event.uuid) } else { true })
+    pub async fn post_change(&self, uuids: Option<Vec<String>>) -> impl Stream<Item = GraSPostChange> {
+        SimpleBroker::<GraSPostChange>::subscribe().filter(move |event| if let Some(uuids) = &uuids { uuids.contains(&event.uuid) } else { true })
     }
 }
 
 #[derive(Enum, Copy, Clone, Eq, PartialEq)]
-enum GPostSort {
+enum GraPostSort {
     Default,
     Last,
     Excellent,
@@ -187,9 +188,9 @@ enum GPostSort {
     LastComment,
 }
 #[derive(InputObject)]
-pub struct GPostListQuery {
+pub struct GraPostListQuery {
     title: Option<String>,
-    sort: Option<GPostSort>,
+    sort: Option<GraPostSort>,
     #[graphql(default = 1)]
     page_no: u64,
     #[graphql(default = 20)]
@@ -198,7 +199,7 @@ pub struct GPostListQuery {
 
 #[derive(SimpleObject, FromQueryResult)]
 #[graphql(complex)]
-pub struct GPost {
+pub struct GraPost {
     uuid: String,
     title: String,
     #[graphql(skip)]
@@ -212,7 +213,7 @@ pub struct GPost {
     created_at: chrono::NaiveDateTime,
 }
 #[ComplexObject]
-impl GPost {
+impl GraPost {
     async fn body(&self, ctx: &Context<'_>) -> String {
         let claims = ctx.data::<Option<crate::serve::jwt::Claims>>();
         if let Ok(Some(claims)) = claims {
@@ -270,20 +271,20 @@ impl GPost {
 }
 
 #[derive(SimpleObject)]
-pub struct GPostList {
-    records: Vec<GPost>,
-    pagination: super::GPagination,
+pub struct GraPostList {
+    records: Vec<GraPost>,
+    pagination: super::GraPagination,
 }
 
 #[derive(InputObject)]
-pub struct GPostCreate {
+pub struct GraPostCreate {
     category_id: i32,
     title: String,
     body: String,
 }
 
 #[derive(InputObject)]
-pub struct GPostUpdate {
+pub struct GraPostUpdate {
     category_id: i32,
     uuid: String,
     title: String,
@@ -297,12 +298,12 @@ enum MutationType {
     Deleted,
 }
 #[derive(Clone, PartialEq)]
-pub struct GSPostChange {
+pub struct GraSPostChange {
     mutation_type: MutationType,
     uuid: String,
 }
 #[Object]
-impl GSPostChange {
+impl GraSPostChange {
     async fn mutation_type(&self) -> MutationType {
         self.mutation_type
     }

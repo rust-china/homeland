@@ -1,5 +1,6 @@
 <script lang="tsx">
 import { graphqlApi } from '@/api'
+import { useUserStore } from '@/stores/user'
 import DOMPurify from 'isomorphic-dompurify';
 import 'github-markdown-css/github-markdown.css'
 // import '@/assets/stylesheets/syntect-highlight-code/syntect-highlight-code.scss'
@@ -8,7 +9,9 @@ import dayjs from 'dayjs'
 
 export default defineComponent({
 	async setup(_ctx) {
+		const userStore = useUserStore()
 		const route = useRoute();
+		const router = useRouter();
 		const post = ref<any>(null)
 		const fetchPost = async () => {
 			const { data: rData } = await graphqlApi({
@@ -39,7 +42,7 @@ export default defineComponent({
 		}
 
 		await fetchPost()
-		return { dayjs, route, post }
+		return { dayjs, route, router, userStore, post }
 	},
 	mounted() {
 		hljs.highlightAll()
@@ -66,6 +69,13 @@ export default defineComponent({
 					</t-card>
 				</div>
 				<div class="w-full lg:w-1/4">
+					<template v-if="userStore.userInfo?.id === post.user?.id">
+						<div class="mb-4">
+							<t-card class="card">
+								<t-button block theme="primary" variant="base" @click="router.push({ name: 'posts/edit', params: { uuid: post.uuid } })">编辑</t-button>
+							</t-card>
+						</div>
+					</template>
 					<div class="mb-4">
 						<t-card class="card">
 							{{ post?.user }}
@@ -85,7 +95,8 @@ export default defineComponent({
 
 <style lang="scss">
 @import 'highlight.js/scss/github.scss';
+
 html[theme-mode=dark] {
-  @import 'highlight.js/scss/github-dark.scss';
+	@import 'highlight.js/scss/github-dark.scss';
 }
 </style> 

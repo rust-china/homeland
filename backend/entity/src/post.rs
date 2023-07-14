@@ -16,6 +16,7 @@ pub struct Model {
     #[sea_orm(column_type = "Text")]
     pub body: String,
     pub score: i32,
+    pub read_count: i32,
     pub like_count: i32,
     pub comment_count: i32,
     pub last_comment_at: Option<DateTime>,

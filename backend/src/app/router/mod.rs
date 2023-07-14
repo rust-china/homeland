@@ -1,7 +1,14 @@
+mod auth;
 mod github;
 mod graphql;
-mod auth;
-use axum::{extract::State, http::StatusCode, response::IntoResponse, routing::get, Json, Router};
+mod storage;
+use axum::{
+    extract::State,
+    http::StatusCode,
+    response::IntoResponse,
+    routing::get,
+    Json, Router,
+};
 
 pub fn compose() -> Router<crate::AppState> {
     Router::new()
@@ -9,6 +16,7 @@ pub fn compose() -> Router<crate::AppState> {
         .nest("/github", github::routes())
         .nest("/graphql", graphql::routes())
         .nest("/auth", auth::routes())
+        .nest("/storage", storage::routes())
 }
 
 pub(crate) async fn health(State(_state): State<crate::AppState>) -> impl IntoResponse {

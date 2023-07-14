@@ -69,6 +69,7 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Post::Title).string().not_null())
                     .col(ColumnDef::new(Post::Body).text().not_null())
                     .col(ColumnDef::new(Post::Score).integer().not_null().default(0))
+                    .col(ColumnDef::new(Post::ReadCount).integer().not_null().default(0))
                     .col(ColumnDef::new(Post::LikeCount).integer().not_null().default(0))
                     .col(ColumnDef::new(Post::CommentCount).integer().not_null().default(0))
                     .col(ColumnDef::new(Post::LastCommentAt).timestamp())
@@ -142,6 +143,31 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
+
+        // storage
+        manager
+            .create_table(
+                Table::create()
+                    .table(Storage::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(Storage::Id).integer().not_null().auto_increment().primary_key())
+                    .col(ColumnDef::new(Storage::UserId).integer().not_null())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk-storage-user_id")
+                            .from(Storage::Table, Storage::UserId)
+                            .to(User::Table, User::Id),
+                    )
+                    .col(ColumnDef::new(Storage::Path).string().not_null().unique_key())
+                    .col(ColumnDef::new(Storage::Size).not_null().integer())
+                    .col(ColumnDef::new(Storage::VisitedCount).not_null().integer().default(0))
+                    .col(ColumnDef::new(Storage::TodayVisitedCount).not_null().integer().default(0))
+                    .col(ColumnDef::new(Storage::CreatedAt).timestamp().default(Expr::current_timestamp()).not_null())
+                    .col(ColumnDef::new(Storage::UpdatedAt).timestamp().default(Expr::current_timestamp()).not_null())
+                    .to_owned(),
+            )
+            .await?;
+
         Ok(())
     }
 
@@ -150,6 +176,8 @@ impl MigrationTrait for Migration {
         manager.drop_table(Table::drop().table(Category::Table).to_owned()).await?;
         manager.drop_table(Table::drop().table(Post::Table).to_owned()).await?;
         manager.drop_table(Table::drop().table(Comment::Table).to_owned()).await?;
+        manager.drop_table(Table::drop().table(Notification::Table).to_owned()).await?;
+        manager.drop_table(Table::drop().table(Storage::Table).to_owned()).await?;
         Ok(())
     }
 }
@@ -192,6 +220,7 @@ enum Post {
     Title,
     Body,
     Score,
+    ReadCount,
     LikeCount,
     CommentCount,
     LastCommentAt,
@@ -225,6 +254,19 @@ enum Notification {
     NotificationableId,
     Read,
     ExtraData,
+    CreatedAt,
+    UpdatedAt,
+}
+
+#[derive(Iden)]
+enum Storage {
+    Table,
+    Id,
+    UserId,
+    Path,
+    Size,
+    VisitedCount,
+    TodayVisitedCount,
     CreatedAt,
     UpdatedAt,
 }

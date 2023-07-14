@@ -2,11 +2,11 @@ name: ci-backend
 
 on:
   push:
-    branches: [ main ]
+    # branches: [ main ]
     paths-ignore:
       - '**/README.md'
   pull_request:
-    branches: [ main ]
+    # branches: [ main ]
     paths-ignore:
       - '**/README.md'
 
@@ -53,3 +53,41 @@ jobs:
       - name: Build # bugs with working-directory see: https://github.com/actions-rs/cargo/issues/86
         run: |
           cargo build --verbose --release --target ${{ matrix.target }}
+  
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: homeland-test
+          POSTGRES_USER: "admin"
+          POSTGRES_PASSWORD: "123456"
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:latest
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      REDIS_URL: redis://localhost:6379/1
+      DATABASE_URL: postgres://admin:123456@localhost:5432/homeland-test
+    steps:
+    - uses: actions/checkout@v3
+    - name: Run Tests
+      run: cargo test --verbose

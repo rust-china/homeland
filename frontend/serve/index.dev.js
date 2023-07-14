@@ -1,7 +1,11 @@
+const path = require('path')
+require('dotenv').config({ path: path.resolve(process.cwd(), '.env.local') })
+
 const Koa = require('koa')
 // middlewares
 const catchError = require('./middlewares/catchError')
 const responseTime = require('./middlewares/responseTime')
+const logger = require('./middlewares/logger')
 const cookie = require('./middlewares/cookie')
 const useRouter = require('./middlewares/useRouter')
 const useDevSSR = require('./middlewares/useSSR.dev')
@@ -13,11 +17,11 @@ const app = new Koa()
 async function startApp(port) {
 	app.use(catchError)
 	app.use(responseTime)
+	app.use(logger)
 	app.use(cookie)	
 	await useRouter(app)
 	await useDevSSR(app)
 	
-
 	app.use(async (ctx, next) => {
 		if (ctx.url.startsWith('/api')) {
 			ctx.respond = false;

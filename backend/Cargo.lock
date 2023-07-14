@@ -65,6 +65,29 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "250f629c0161ad8107cf89319e990051fae62832fd343083bea452d93e2205fd"
 
 [[package]]
+name = "aliyun-oss-client"
+version = "0.12.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bd48f43adfc2eced76caa8df5be1a20d45bfbe5324bec9e96ca5043aead89146"
+dependencies = [
+ "async-stream",
+ "async-trait",
+ "base64 0.21.2",
+ "chrono",
+ "futures-core",
+ "hmac",
+ "http",
+ "infer",
+ "oss_derive",
+ "percent-encoding",
+ "quick-xml",
+ "reqwest",
+ "sha1",
+ "thiserror",
+ "url",
+]
+
+[[package]]
 name = "allocator-api2"
 version = "0.2.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -262,6 +285,7 @@ dependencies = [
  "matchit",
  "memchr",
  "mime",
+ "multer",
  "percent-encoding",
  "pin-project-lite",
  "rustversion",
@@ -322,6 +346,7 @@ dependencies = [
 name = "backend"
 version = "0.1.0"
 dependencies = [
+ "aliyun-oss-client",
  "anyhow",
  "async-graphql",
  "async-graphql-axum",
@@ -332,6 +357,7 @@ dependencies = [
  "entity",
  "jsonwebtoken",
  "log",
+ "md5",
  "once_cell",
  "pulldown-cmark",
  "reqwest",
@@ -538,6 +564,17 @@ name = "cc"
 version = "1.0.79"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "50d30906286121d95be3d479533b458f87493b30a4b5f79a607db8f5d11aa91f"
+
+[[package]]
+name = "cfb"
+version = "0.7.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d38f2da7a0a2c4ccf0065be06397cc26a81f4e528be095826eee9d4adbb8c60f"
+dependencies = [
+ "byteorder",
+ "fnv",
+ "uuid",
+]
 
 [[package]]
 name = "cfg-if"
@@ -762,6 +799,7 @@ dependencies = [
 name = "entity"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "futures-util",
  "sea-orm",
  "serde",
@@ -1271,6 +1309,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "infer"
+version = "0.14.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bbb78f4c4a058ef30a9ff77322e758f7e60f871274b602d7fdc1b0956b0cb88e"
+dependencies = [
+ "cfb",
+]
+
+[[package]]
 name = "instant"
 version = "0.1.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1406,6 +1453,12 @@ checksum = "6365506850d44bff6e2fbcb5176cf63650e48bd45ef2fe2665ae1570e0f4b9ca"
 dependencies = [
  "digest",
 ]
+
+[[package]]
+name = "md5"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "490cc448043f947bae3cbee9c203358d62dbee0db12107a74be5c30ccfd09771"
 
 [[package]]
 name = "memchr"
@@ -1647,6 +1700,17 @@ name = "os_str_bytes"
 version = "6.5.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4d5d9eb14b174ee9aa2ef96dc2b94637a2d4b6e7cb873c7e171f0c20c6cf3eac"
+
+[[package]]
+name = "oss_derive"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8f3e5eab112f3adb129844260460da809a51443fe0be1febb39041e39ce8af9b"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
 
 [[package]]
 name = "ouroboros"

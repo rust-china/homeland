@@ -55,7 +55,7 @@ reqwest = { workspace = true }
 tokio = { workspace = true }
 tokio-stream = { version = "0.1", features = ["time"] }
 jsonwebtoken = "8"
-axum = { version = "0.6", features = ["headers"] }
+axum = { version = "0.6", features = ["headers", "multipart"] }
 axum-extra = { version = "0.7", features = ["cookie"] }
 tower-http = { version = "0.4", features = ["cors"] }
 async-graphql = { version = "5", features = ["apollo_tracing"] }
@@ -71,6 +71,9 @@ slab = "0.4"
 
 pulldown-cmark = "0.9"
 syntect = "5.0"
+
+md5 = "0.7"
+aliyun-oss-client = "0.12"
 
 sea-orm = { workspace = true } 
 entity = { workspace = true }

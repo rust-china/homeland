@@ -24,7 +24,11 @@ onMounted(() => {
 </script>
 
 <template>
-	<main></main>
+	<main class="main-container">
+		<t-card class="card my-10">
+			正在登录...
+		</t-card>
+	</main>
 </template>
 
 <style lang="scss" scoped>

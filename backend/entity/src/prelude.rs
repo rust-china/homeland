@@ -6,4 +6,5 @@ pub use super::category::Entity as Category;
 pub use super::comment::Entity as Comment;
 pub use super::notification::Entity as Notification;
 pub use super::post::Entity as Post;
+pub use super::storage::Entity as Storage;
 pub use super::user::Entity as User;

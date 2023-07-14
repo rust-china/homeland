@@ -10,7 +10,7 @@ import LayoutHeader from './LayoutHeader.vue'
 		<header class="layout-body">
 			<slot></slot>
 		</header>
-		<header class="layout-footer main-container">footer</header>
+		<!-- <header class="layout-footer main-container">footer</header> -->
 	</main>
 </template>
 

@@ -42,24 +42,24 @@ watchEffect(() => {
 
 <template>
   <main class="markdown-editor w-full flex gap-5">
-    <t-tabs class="w-full" v-model="activeTab" theme="card">
+    <t-tabs class="w-full flex flex-col" v-model="activeTab" theme="card">
       <t-tab-panel value="editor" label="输入" destroyOnHide>
-        <div class="py-5">
+        <div class="h-full py-5 overflow-hidden">
           <t-textarea class="editor flex-1" v-model="currentValue"
             placeholder="请输入markdown语法"></t-textarea>
         </div>
 
       </t-tab-panel>
       <t-tab-panel value="preview" label="预览" destroyOnHide>
-        <div class="py-5">
+        <div class="h-full py-5 overflow-hidden">
           <div class="html-render flex-1 markdown-body" v-html="htmlText"></div>
         </div>
       </t-tab-panel>
       <t-tab-panel value="editorAndPreview" label="编辑/预览" destroyOnHide>
-        <div class="py-5 flex gap-5">
-          <t-textarea class="editor flex-1" v-model="currentValue"
+        <div class="h-full py-5 flex gap-5 overflow-hidden">
+          <t-textarea class="editor flex-1 flex-shrink-0" v-model="currentValue"
             placeholder="请输入markdown语法"></t-textarea>
-          <div class="html-render flex-1 markdown-body border border-sky-500" v-html="htmlText"></div>
+          <div class="html-render flex-1 markdown-body border border-sky-500 overflow-auto" v-html="htmlText"></div>
         </div>
       </t-tab-panel>
     </t-tabs>
@@ -72,8 +72,23 @@ watchEffect(() => {
 html[theme-mode=dark] {
   @import 'highlight.js/scss/github-dark.scss';
 }
+</style> 
+
+<style lang="scss" scoped>
+.markdown-editor {
+  .editor {
+    @apply h-full;
+  }
+
+  ::v-deep(.t-tabs__content) {
+    flex: 1;
+  }
+  ::v-deep(.t-tab-panel) {
+    @apply h-full;
+  }
+}
 
 .html-render {
   padding: 15px;
 }
-</style> 
+</style>

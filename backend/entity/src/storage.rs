@@ -12,6 +12,7 @@ pub struct Model {
     #[sea_orm(unique)]
     pub path: String,
     pub size: i32,
+    pub content_type: Option<String>,
     pub visited_count: i32,
     pub today_visited_count: i32,
     pub created_at: DateTime,

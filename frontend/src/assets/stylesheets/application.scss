@@ -10,7 +10,12 @@
   font-weight: normal;
 }
 
+html {
+  @apply h-full;
+}
+
 body {
+  height: 100%;
   min-height: 100vh;
   color: var(--color-text);
   background: var(--color-background);
@@ -32,12 +37,24 @@ body {
 }
 
 .card {
-	@apply border-none bg-white shadow-sm sm:rounded-lg;
-	@apply bg-white;
-	@apply dark:bg-gray-900 dark:border dark:border-solid dark:border-gray-800;
+  @apply border-none bg-white shadow-sm sm:rounded-lg;
+  @apply bg-white;
+  @apply dark:bg-gray-900 dark:border dark:border-solid dark:border-gray-800;
+}
 
-	.html-render {
-		background-color: transparent;
+#app {
+  @apply h-full;
+
+  .html-render {
+    background-color: transparent;
     // padding: 15px;
-	}
+
+    ul {
+      list-style-type: disc;
+    }
+
+    ol {
+      list-style-type: decimal;
+    }
+  }
 }

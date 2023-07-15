@@ -12,6 +12,8 @@ export default defineComponent({
 		const userStore = useUserStore()
 		const route = useRoute();
 		const router = useRouter();
+		
+		const userInfo = ref<any>(null)
 		const post = ref<any>(null)
 		const fetchPost = async () => {
 			const { data: rData } = await graphqlApi({
@@ -42,10 +44,11 @@ export default defineComponent({
 		}
 
 		await fetchPost()
-		return { dayjs, route, router, userStore, post }
+		return { dayjs, route, router, userInfo, userStore, post }
 	},
 	mounted() {
-		hljs.highlightAll()
+		this.userInfo = this.userStore.userInfo
+		hljs.highlightAll()	
 	}
 })
 </script>
@@ -69,7 +72,7 @@ export default defineComponent({
 					</t-card>
 				</div>
 				<div class="w-full lg:w-1/4">
-					<template v-if="userStore.userInfo?.id === post.user?.id">
+					<template v-if="userInfo?.id === post.user?.id">
 						<div class="mb-4">
 							<t-card class="card">
 								<t-button block theme="primary" variant="base" @click="router.push({ name: 'posts/edit', params: { uuid: post.uuid } })">编辑</t-button>

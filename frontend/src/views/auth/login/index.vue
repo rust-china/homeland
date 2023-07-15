@@ -25,7 +25,7 @@ onMounted(() => {
 
 <template>
 	<main class="main-container">
-		<t-card class="card my-10">
+		<t-card class="card my-5">
 			正在登录...
 		</t-card>
 	</main>

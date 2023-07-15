@@ -3,13 +3,13 @@ import LayoutHeader from './LayoutHeader.vue'
 </script>
 
 <template>
-  <main class="layout">
+  <main class="layout h-full flex flex-col">
 		<header class="layout-header">
 			<LayoutHeader></LayoutHeader>
 		</header>
-		<header class="layout-body">
+		<div class="layout-body flex-1">
 			<slot></slot>
-		</header>
+		</div>
 		<!-- <header class="layout-footer main-container">footer</header> -->
 	</main>
 </template>

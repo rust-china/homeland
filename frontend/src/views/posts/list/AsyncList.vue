@@ -127,9 +127,9 @@ export default defineComponent({
 .posts-header {
 	@apply text-sm;
 	@apply bg-white shadow-sm;
-  @apply dark:bg-gray-900 dark:border-t dark:bg-opacity-70 dark:border-solid dark:border-gray-900;
+	@apply dark:bg-gray-900 dark:border-t dark:bg-opacity-70 dark:border-solid dark:border-gray-900;
 
-	a {		
+	a {
 		&.active {
 			@apply font-bold;
 		}

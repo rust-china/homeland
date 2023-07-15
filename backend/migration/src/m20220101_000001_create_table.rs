@@ -159,6 +159,7 @@ impl MigrationTrait for Migration {
                             .to(User::Table, User::Id),
                     )
                     .col(ColumnDef::new(Storage::Path).string().not_null().unique_key())
+                    .col(ColumnDef::new(Storage::ContentType).string())
                     .col(ColumnDef::new(Storage::Size).not_null().integer())
                     .col(ColumnDef::new(Storage::VisitedCount).not_null().integer().default(0))
                     .col(ColumnDef::new(Storage::TodayVisitedCount).not_null().integer().default(0))
@@ -265,6 +266,7 @@ enum Storage {
     UserId,
     Path,
     Size,
+    ContentType,
     VisitedCount,
     TodayVisitedCount,
     CreatedAt,

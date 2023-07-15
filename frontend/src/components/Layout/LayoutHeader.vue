@@ -46,60 +46,65 @@ onMounted(() => {
 </script>
 
 <template>
-	<div class="layout-header z-50">
-		<div
-			class="main-container h-full relative flex flex-wrap items-center justify-between px-3 mx-auto lg:px-0 md:flex-nowrap">
-			<div class="left-panel flex-1 h-full flex items-center">
-				<RouterLink :to="{ path: '/' }" class="title whitespace-nowrap">
-					<b>Rust</b> China
-				</RouterLink>
-				<t-dropdown class="block md:hidden" :options="menuOptions" trigger="click" @click="(option) => onTabChange(option.value as any)">
-					<t-icon name="view-list" size="16" />
-				</t-dropdown>
-				<div class="hidden md:block">
-					<div class="tabs">
-						<t-space>
-							<template v-for="option in menuOptions" :key="option.value">
-								<RouterLink :to="{ name: option.value }">
-									<span class="tab-item" :class="{active: activeTab === option.value}">{{ option.content }}</span>
-								</RouterLink>
-							</template>
-						</t-space>
+	<div class="layout-header">
+		<div class="layout-header-fixed z-50">
+			<div
+				class="main-container h-full relative flex flex-wrap items-center justify-between px-3 mx-auto lg:px-0 md:flex-nowrap">
+				<div class="left-panel flex-1 h-full flex items-center">
+					<RouterLink :to="{ path: '/' }" class="title whitespace-nowrap">
+						<b>Rust</b> China
+					</RouterLink>
+					<t-dropdown class="block md:hidden" :options="menuOptions" trigger="click" @click="(option) => onTabChange(option.value as any)">
+						<t-icon name="view-list" size="16" />
+					</t-dropdown>
+					<div class="hidden md:block">
+						<div class="tabs">
+							<t-space>
+								<template v-for="option in menuOptions" :key="option.value">
+									<RouterLink :to="{ name: option.value }">
+										<span class="tab-item" :class="{active: activeTab === option.value}">{{ option.content }}</span>
+									</RouterLink>
+								</template>
+							</t-space>
+						</div>
 					</div>
 				</div>
-			</div>
-			<t-space class="right-panel">
-				<t-form class="hidden md:block" :ref="formState.setFormRef" :data="formState.model" :rules="formState.rules" :requiredMark="false" layout="inline"
-					:labelWidth="0" @reset="formState.onReset" @submit="formState.onSubmit">
-					<t-auto-complete v-model="formState.model.searchText" placeholder="搜索"></t-auto-complete>
-				</t-form>
-				<template v-if="userInfo">
-					<t-button shape="circle" variant="text">
-						<template #icon>
-							<t-icon name="notification"></t-icon>
-						</template>
-					</t-button>
-					<t-dropdown :options="userOptions" :min-column-width="88">
-						<t-button theme="default" variant="text"> 
-							<template #suffix>
-								<t-icon name="caret-down-small"></t-icon>
+				<t-space class="right-panel">
+					<t-form class="hidden md:block" :ref="formState.setFormRef" :data="formState.model" :rules="formState.rules" :requiredMark="false" layout="inline"
+						:labelWidth="0" @reset="formState.onReset" @submit="formState.onSubmit">
+						<t-auto-complete v-model="formState.model.searchText" placeholder="搜索"></t-auto-complete>
+					</t-form>
+					<template v-if="userInfo">
+						<t-button shape="circle" variant="text">
+							<template #icon>
+								<t-icon name="notification"></t-icon>
 							</template>
-							{{ userInfo['name'] || userInfo['username'] }} 
 						</t-button>
-					</t-dropdown>
-				</template>
-				<template v-else>
-					<RouterLink to="/auth/login">
-						<t-button>登录</t-button>
-					</RouterLink>
-				</template>
-			</t-space>
+						<t-dropdown :options="userOptions" :min-column-width="88">
+							<t-button theme="default" variant="text"> 
+								<template #suffix>
+									<t-icon name="caret-down-small"></t-icon>
+								</template>
+								{{ userInfo['name'] || userInfo['username'] }} 
+							</t-button>
+						</t-dropdown>
+					</template>
+					<template v-else>
+						<RouterLink to="/auth/login">
+							<t-button>登录</t-button>
+						</RouterLink>
+					</template>
+				</t-space>
+			</div>
 		</div>
 	</div>
 </template>
 
 <style lang="scss" scoped>
 .layout-header {
+	@apply h-5;
+}
+.layout-header-fixed {
 	@apply bg-white shadow-sm border-none text-gray-800 fixed left-0 right-0 top-0 h-[48px];
 	@apply dark:bg-gray-900 dark:text-gray-200 dark:border-b dark:border-solid dark:border-gray-800;
 

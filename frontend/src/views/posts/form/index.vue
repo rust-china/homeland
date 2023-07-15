@@ -1,7 +1,8 @@
 <script lang="tsx" setup>
 import { useForm } from '@/utils/hooks/useForm';
 import CategoryCascader from '@/components/selects/CategoryCascader.vue'
-import MarkdownEditor from '@/components/shared/MarkdownEditor.vue'
+// import MarkdownEditor from '@/components/shared/MarkdownEditor.vue'
+import MarkdownVditor from '@/components/shared/MarkdownVditor.vue'
 import { graphqlApi } from '@/api'
 import { MessagePlugin } from 'tdesign-vue-next';
 import { onMounted } from 'vue';
@@ -75,10 +76,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="posts-form main-container mt-3">
-    <t-card class=" card">
-      <t-form :ref="formState.setFormRef" :data="formState.model" :rules="formState.rules" :requiredMark="false"
-        :labelWidth="0" @reset="formState.onReset" @submit="formState.onSubmit">
+  <main class="posts-form main-container h-full pb-5">
+    <t-card class="card h-full">
+      <t-form class="h-full flex flex-col" :ref="formState.setFormRef" :data="formState.model" :rules="formState.rules"
+        :requiredMark="false" :labelWidth="0" @reset="formState.onReset" @submit="formState.onSubmit">
         <div class="flex gap-5">
           <t-form-item name="categoryId" :rules="[{ required: true, number: true, message: '分类必填' }]">
             <CategoryCascader v-model="formState.model.categoryId"></CategoryCascader>
@@ -88,8 +89,9 @@ onMounted(() => {
           </t-form-item>
         </div>
 
-        <t-form-item name="body" :rules="[{ required: true, message: '内容必填' }]">
-          <MarkdownEditor v-model="formState.model.body"></MarkdownEditor>
+        <t-form-item class="body-form-tem flex-1" name="body" :rules="[{ required: true, message: '内容必填' }]">
+          <!-- <MarkdownEditor class="h-full" v-model="formState.model.body"></MarkdownEditor> -->
+          <MarkdownVditor class="h-full" v-model="formState.model.body"></MarkdownVditor>
         </t-form-item>
         <t-form-item>
           <t-space size="small">
@@ -103,4 +105,20 @@ onMounted(() => {
   </main>
 </template>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.card {
+  ::v-deep(.t-card__body) {
+    @apply h-full;
+  }
+}
+
+.body-form-tem {
+  ::v-deep(.t-form__controls) {
+    @apply h-full;
+
+    .t-form__controls-content {
+      @apply h-full;
+    }
+  }
+}
+</style>

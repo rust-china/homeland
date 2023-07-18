@@ -10,7 +10,7 @@ export function useForm(params: FormParams) {
 		},
 		formRef: undefined,
 		model: params.model ?? {},
-		rules: {},
+		rules: params.rules ?? {},
 		submitLoading: false,
 		async validate(params?: FormValidateParams) {
 			return formState.formRef?.validate(params)

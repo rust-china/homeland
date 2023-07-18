@@ -135,14 +135,4 @@ export default defineComponent({
 		}
 	}
 }
-
-.t-list-item {
-	background-color: transparent;
-}
-
-.t-pagination {
-	::v-deep(.t-pagination__jump) {
-		background-color: transparent;
-	}
-}
 </style>

@@ -2,15 +2,16 @@ mod auth;
 mod category;
 mod health;
 mod post;
+mod comment;
 
 use async_graphql::extensions::{Analyzer, ApolloTracing};
 use async_graphql::*;
 
 #[derive(Default, MergedObject)]
-pub struct AppQuery(health::HealthQuery, auth::AuthQuery, category::CategoryQuery, post::PostQuery);
+pub struct AppQuery(health::HealthQuery, auth::AuthQuery, category::CategoryQuery, post::PostQuery, comment::CommentQuery);
 
 #[derive(Default, MergedObject)]
-pub struct AppMutation(auth::AuthMutation /*, category::CategoryMutation */, post::PostMutation);
+pub struct AppMutation(auth::AuthMutation /*, category::CategoryMutation */, post::PostMutation, comment::CommentMutation);
 
 #[derive(Default, MergedSubscription)]
 pub struct AppSubscription(post::PostSubscription);

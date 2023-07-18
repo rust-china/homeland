@@ -1,5 +1,6 @@
 <script lang="tsx" setup>
-import AsyncShow from './AsyncShow.vue'
+import AsyncShow from './AsyncShow/index.vue'
+
 </script>
 
 <template>

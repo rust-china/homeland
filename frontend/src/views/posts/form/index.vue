@@ -95,7 +95,7 @@ onMounted(() => {
         </t-form-item>
         <t-form-item>
           <t-space size="small">
-            <t-button theme="primary" type="submit">提交</t-button>
+            <t-button theme="primary" type="submit" :loading="formState.submitLoading">提交</t-button>
             <t-button theme="default" variant="base" type="reset">重置</t-button>
             <t-button theme="default" variant="base" @click=" formState.onClear">清空校验结果</t-button>
           </t-space>

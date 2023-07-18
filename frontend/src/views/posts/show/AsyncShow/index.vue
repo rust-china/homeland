@@ -6,8 +6,14 @@ import 'github-markdown-css/github-markdown.css'
 // import '@/assets/stylesheets/syntect-highlight-code/syntect-highlight-code.scss'
 import hljs from 'highlight.js'
 import dayjs from 'dayjs'
+import Comments from './Comments.vue'
+import NewComment from './NewComment.vue'
 
 export default defineComponent({
+	components: {
+		Comments,
+		NewComment,
+	},
 	async setup(_ctx) {
 		const userStore = useUserStore()
 		const route = useRoute();
@@ -54,7 +60,7 @@ export default defineComponent({
 </script>
 
 <template>
-	<main class="post">
+	<main class="post mb-5">
 		<div class="post-body main-container px-0 mt-3 md:px-4 lg:px-0">
 			<div class="flex flex-col gap-4 lg:flex-row">
 				<div class="grow lg:w-3/4">
@@ -69,6 +75,12 @@ export default defineComponent({
 							</t-space>
 						</template>
 						<div class="html-render markdown-body" v-html="post?.bodyHtml"></div>
+					</t-card>
+					<t-card bordered class="card mt-5">
+						<Comments></Comments>
+					</t-card>
+					<t-card bordered class="card mt-5">
+						<NewComment></NewComment>
 					</t-card>
 				</div>
 				<div class="w-full lg:w-1/4">

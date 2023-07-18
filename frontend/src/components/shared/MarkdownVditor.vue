@@ -10,6 +10,7 @@ const props = defineProps({
 		type: String,
 		required: true,
 	},
+	options: [Object],
 })
 const emits = defineEmits(['update:modelValue'])
 
@@ -109,7 +110,8 @@ onMounted(() => {
 		},
 		input: (value: string) => {
 			emits('update:modelValue', value)
-		}
+		},
+		...props.options
 	})
 
 	nextTick(() => {

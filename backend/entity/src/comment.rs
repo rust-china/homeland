@@ -66,3 +66,17 @@ impl ActiveModel {
         }
     }
 }
+
+impl Model {
+    pub fn parent_id(&self) -> Option<i32> {
+        if let Some(ancestry) = &self.ancestry {
+            let last = ancestry.split("/").last();
+            if let Some(last) = last {
+                if let Ok(value) = last.parse::<i32>() {
+                    return Some(value)
+                }
+            }
+        }
+        None
+    }
+}

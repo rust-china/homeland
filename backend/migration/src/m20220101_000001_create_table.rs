@@ -13,9 +13,10 @@ impl MigrationTrait for Migration {
                     .table(User::Table)
                     .if_not_exists()
                     .col(ColumnDef::new(User::Id).integer().not_null().auto_increment().primary_key())
-                    .col(ColumnDef::new(User::Username).string().not_null())
+                    .col(ColumnDef::new(User::Username).string().not_null().unique_key())
                     .col(ColumnDef::new(User::Name).string())
                     .col(ColumnDef::new(User::Email).string().not_null())
+                    .col(ColumnDef::new(User::Avatar).string())
                     .col(ColumnDef::new(User::GithubData).json())
                     .col(ColumnDef::new(User::ExtraData).json())
                     .col(ColumnDef::new(User::State).integer().not_null().default(1))
@@ -191,6 +192,7 @@ enum User {
     Username,
     Name,
     Email,
+    Avatar,
     GithubData,
     ExtraData,
     State,

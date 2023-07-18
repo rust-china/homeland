@@ -1,8 +1,15 @@
-use axum::{async_trait, extract::FromRequestParts, headers, http::request::Parts, RequestPartsExt, TypedHeader};
+use axum::{
+    extract::{FromRef, FromRequestParts},
+    headers,
+    http::request::Parts,
+    RequestPartsExt, TypedHeader,
+};
 use axum_extra::extract::cookie::{Cookie, SameSite};
+use entity::{prelude::*, user};
 use jsonwebtoken::{DecodingKey, EncodingKey, Validation};
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 
 struct Keys {
     encoding: EncodingKey,
@@ -42,21 +49,33 @@ pub struct Claims {
     pub nbf: i64,
 }
 
-#[async_trait]
+#[axum::async_trait]
 impl<S> FromRequestParts<S> for Claims
 where
+    Arc<crate::AppState>: FromRef<S>,
     S: Send + Sync,
 {
     type Rejection = crate::Error;
 
-    async fn from_request_parts(parts: &mut Parts, _state: &S) -> Result<Self, Self::Rejection> {
+    async fn from_request_parts(parts: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
         let TypedHeader(cookie) = match parts.extract::<TypedHeader<headers::Cookie>>().await {
             Ok(v) => v,
             Err(e) => return Err(crate::Error::Message(e.to_string())),
         };
+        let state = Arc::from_ref(state);
         // Decode the user
         if let Some(token) = cookie.get("token") {
-            Ok(decode(token)?)
+            let claims = decode(token)?;
+            match User::find_by_id(claims.sub.user_id).into_model::<user::Model>().one(&state.db_conn).await? {
+                Some(db_user) => {
+                    if db_user.is_valid() {
+                        Ok(claims)
+                    } else {
+                        Err(crate::Error::RespMessage(401, format!("用户{}已被禁用, 请联系管理员", db_user.username)))
+                    }
+                }
+                _ => Err(crate::Error::RespMessage(401, "user not found".into())),
+            }
         } else {
             return Err(crate::Error::RespMessage(401, "token not exists".into()));
         }
@@ -76,7 +95,7 @@ pub fn decode(token: &str) -> anyhow::Result<Claims> {
     Ok(claims)
 }
 
-pub fn build_cookie(key: &str, sub: Sub , max_age: i64) -> anyhow::Result<Cookie<'static>> {
+pub fn build_cookie(key: &str, sub: Sub, max_age: i64) -> anyhow::Result<Cookie<'static>> {
     let jwt_expires_in = max_age;
     let now = chrono::Utc::now();
     let claims = crate::serve::jwt::Claims {

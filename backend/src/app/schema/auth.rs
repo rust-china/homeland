@@ -1,12 +1,13 @@
 use async_graphql::*;
 use entity::{prelude::*, user};
+use std::sync::Arc;
 
 #[derive(Default, Debug)]
 pub struct AuthQuery;
 #[Object]
 impl AuthQuery {
     pub async fn user(&self, ctx: &Context<'_>) -> Result<serde_json::Value> {
-        let state = ctx.data::<crate::AppState>()?;
+        let state = ctx.data::<Arc<crate::AppState>>()?;
         let claims = ctx
             .data::<Option<crate::serve::jwt::Claims>>()?
             .as_ref()

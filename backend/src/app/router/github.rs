@@ -1,4 +1,3 @@
-use entity::{prelude::*, user};
 use axum::{
     extract::{Query, State},
     http::header,
@@ -6,8 +5,10 @@ use axum::{
     routing::get,
     Router,
 };
+use entity::{prelude::*, user};
+use std::sync::Arc;
 
-pub fn routes() -> Router<crate::AppState> {
+pub fn routes() -> Router<Arc<crate::AppState>> {
     let github_oauth_client_id = std::env::var("GITHUB_OAUTH_CLIENT_ID").unwrap();
     let github_oauth_redirect_url = std::env::var("GITHUB_OAUTH_REDIRECT_URL").unwrap();
     let github_oauth_url = format!(
@@ -24,11 +25,7 @@ pub fn routes() -> Router<crate::AppState> {
 pub struct CallbackQuery {
     pub code: String,
 }
-#[derive(sea_orm::FromQueryResult)]
-struct DbUser {
-    id: i32,
-}
-pub(crate) async fn callback(State(state): State<crate::AppState>, query: Query<CallbackQuery>) -> Result<impl IntoResponse, crate::Error> {
+pub(crate) async fn callback(State(state): State<Arc<crate::AppState>>, query: Query<CallbackQuery>) -> Result<impl IntoResponse, crate::Error> {
     let handle = || async {
         let github_oauth_client_id = std::env::var("GITHUB_OAUTH_CLIENT_ID").unwrap();
         let github_oauth_client_secret = std::env::var("GITHUB_OAUTH_CLIENT_SECRET").unwrap();
@@ -63,20 +60,22 @@ pub(crate) async fn callback(State(state): State<crate::AppState>, query: Query<
             .await?;
         log::trace!("https://api.github.com/user => {:?}", resp);
 
-        let username = format!("{}", resp["login"].as_str().unwrap_or(""));
+        let username = format!("{}", resp["login"].as_str().ok_or_else(|| crate::Error::RespMessage(422, "username not found".into()))?);
+        let email = format!("{}", resp["email"].as_str().ok_or_else(|| crate::Error::RespMessage(422, "email not found".into()))?);
+        let name = match resp["name"].as_str() {
+            Some(v) => Some(v.to_owned()),
+            _ => None
+        };
         let mut user = user::ActiveModel {
-            name: Set(Some(format!("{}", resp["name"].as_str().unwrap_or("")))),
+            name: Set(name),
             username: Set(username.clone()),
-            email: Set(format!("{}", resp["email"].as_str().unwrap_or(""))),
-            github_data: Set(Some(resp)),
+            email: Set(email),
+            github_data: Set(None), /*Set(Some(resp))*/
             ..Default::default()
         };
         let db_user = User::find()
-            .select_only()
-            .columns([user::Column::Id])
             .filter(user::Column::Username.eq(username.clone()))
-            .into_model::<DbUser>()
-            // .into_json()
+            .into_model::<user::Model>()
             .one(&state.db_conn)
             .await?;
         let ret;

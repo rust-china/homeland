@@ -1,5 +1,6 @@
 use async_graphql::*;
 use entity::{category, post, prelude::*, user};
+use std::sync::Arc;
 // use futures_util::StreamExt;
 use std::time::Duration;
 use tokio_stream::{Stream, StreamExt};
@@ -11,9 +12,17 @@ pub struct PostQuery;
 #[Object]
 impl PostQuery {
     pub async fn post_list(&self, ctx: &Context<'_>, query: GraPostListQuery) -> Result<GraPostList> {
-        let state = ctx.data::<crate::AppState>()?;
+        let state = ctx.data::<Arc<crate::AppState>>()?;
+        let no_point_category = Category::find()
+            .filter(category::Column::Code.eq("NO_POINT".to_owned()))
+            .into_model::<category::Model>()
+            .one(&state.db_conn)
+            .await?
+            .ok_or_else(|| crate::Error::RespMessage(422, "no point category not found".into()))?;
 
         let mut condition = Condition::all();
+        condition = condition.add(post::Column::DeletedAt.is_null());
+        condition = condition.add(post::Column::CategoryId.ne(no_point_category.id));
         if let Some(title) = query.title {
             condition = condition.add(post::Column::Title.contains(&title));
         }
@@ -56,7 +65,7 @@ impl PostQuery {
         })
     }
     pub async fn post(&self, ctx: &Context<'_>, uuid: String) -> Result<GraPost> {
-        let state = ctx.data::<crate::AppState>()?;
+        let state = ctx.data::<Arc<crate::AppState>>()?;
         let uuid = Uuid::parse_str(&uuid)?;
         let model = Post::find_by_uuid(uuid)
             .one(&state.db_conn)
@@ -83,11 +92,10 @@ pub struct PostMutation;
 #[Object]
 impl PostMutation {
     pub async fn post_create(&self, ctx: &Context<'_>, input: GraPostCreate) -> Result<String> {
-        let state = ctx.data::<crate::AppState>()?;
+        let state = ctx.data::<Arc<crate::AppState>>()?;
         let claims = ctx
-            .data::<Option<crate::serve::jwt::Claims>>()?
-            .as_ref()
-            .ok_or_else(|| Error::new_with_source(crate::Error::Message("should login".into())))?;
+            .data::<crate::serve::jwt::Claims>()
+            .map_err(|_err| crate::Error::RespMessage(422, String::from("无权限")))?;
 
         let post = post::ActiveModel {
             title: Set(input.title),
@@ -106,11 +114,10 @@ impl PostMutation {
         Ok(post.uuid.to_string())
     }
     pub async fn post_update(&self, ctx: &Context<'_>, input: GraPostUpdate) -> Result<bool> {
-        let state = ctx.data::<crate::AppState>()?;
+        let state = ctx.data::<Arc<crate::AppState>>()?;
         let claims = ctx
-            .data::<Option<crate::serve::jwt::Claims>>()?
-            .as_ref()
-            .ok_or_else(|| Error::new_with_source(crate::Error::Message("should login".into())))?;
+            .data::<crate::serve::jwt::Claims>()
+            .map_err(|_err| crate::Error::RespMessage(422, String::from("无权限")))?;
 
         // let post = post::Entity::find_by_id(id).one(&state.db_conn).await?;
         let post = Post::find()
@@ -137,11 +144,10 @@ impl PostMutation {
         Ok(true)
     }
     pub async fn post_delete(&self, ctx: &Context<'_>, uuid: String) -> Result<bool> {
-        let state = ctx.data::<crate::AppState>()?;
+        let state = ctx.data::<Arc<crate::AppState>>()?;
         let claims = ctx
-            .data::<Option<crate::serve::jwt::Claims>>()?
-            .as_ref()
-            .ok_or_else(|| Error::new_with_source(crate::Error::Message("should login".into())))?;
+            .data::<crate::serve::jwt::Claims>()
+            .map_err(|_err| crate::Error::RespMessage(422, String::from("无权限")))?;
 
         let post = Post::find()
             .filter(
@@ -236,7 +242,7 @@ impl GraPost {
         "".to_string()
     }
     async fn user(&self, ctx: &Context<'_>) -> Result<serde_json::Value> {
-        let state = ctx.data::<crate::AppState>()?;
+        let state = ctx.data::<Arc<crate::AppState>>()?;
         let db_user = User::find_by_id(self.user_id)
             .select_only()
             .columns([
@@ -254,7 +260,7 @@ impl GraPost {
         Ok(db_user)
     }
     async fn category(&self, ctx: &Context<'_>) -> Result<serde_json::Value> {
-        let state = ctx.data::<crate::AppState>()?;
+        let state = ctx.data::<Arc<crate::AppState>>()?;
         let json = Category::find()
             .select_only()
             .columns([

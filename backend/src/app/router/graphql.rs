@@ -5,14 +5,15 @@ use axum::{
     routing::get,
     Router,
 };
+use std::sync::Arc;
 
-pub fn routes() -> Router<crate::AppState> {
+pub fn routes() -> Router<Arc<crate::AppState>> {
     let schema = crate::APP_STATE.get().unwrap().schema.clone();
     Router::new()
         .route("/", get(get_graphiql).post(post_graphql))
         .route("/:version", get(get_graphiql))
         .route_service("/ws", GraphQLSubscription::new(schema))
-        // .layer(Extension(schema))
+    // .layer(Extension(schema))
 }
 
 #[derive(serde::Deserialize)]
@@ -45,6 +46,10 @@ pub async fn get_graphiql(version: Option<Path<String>>, query: Option<Query<Pla
     ))
 }
 
-pub async fn post_graphql(State(state): State<crate::AppState>, claims: Option<crate::serve::jwt::Claims>/* , Extension(schema): Extension<crate::app::schema::AppSchema>*/, req: GraphQLRequest) -> GraphQLResponse {
+pub async fn post_graphql(
+    State(state): State<Arc<crate::AppState>>,
+    claims: Option<crate::serve::jwt::Claims>, /* , Extension(schema): Extension<crate::app::schema::AppSchema>*/
+    req: GraphQLRequest,
+) -> GraphQLResponse {
     state.schema.execute(req.into_inner().data(state.clone()).data(claims)).await.into()
 }

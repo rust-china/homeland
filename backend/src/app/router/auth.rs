@@ -6,12 +6,13 @@ use axum::{
 };
 use axum_extra::extract::cookie::{Cookie, CookieJar};
 use entity::{prelude::*, user};
+use std::sync::Arc;
 
-pub fn routes() -> Router<crate::AppState> {
+pub fn routes() -> Router<Arc<crate::AppState>> {
     Router::new()
         .route(
             "/user",
-            get(|State(state): State<crate::AppState>, claims: crate::serve::jwt::Claims| async move {
+            get(|State(state): State<Arc<crate::AppState>>, claims: crate::serve::jwt::Claims| async move {
                 let sub = claims.sub;
                 let db_user = User::find()
                     .select_only()

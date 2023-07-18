@@ -15,9 +15,11 @@ pub enum State {
 pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,
+    #[sea_orm(unique)]
     pub username: String,
     pub name: Option<String>,
     pub email: String,
+    pub avatar: Option<String>,
     pub github_data: Option<Json>,
     pub extra_data: Option<Json>,
     pub state: State,
@@ -62,3 +64,9 @@ impl Related<super::post::Entity> for Entity {
 }
 
 impl ActiveModelBehavior for ActiveModel {}
+
+impl Model {
+    pub fn is_valid(&self) -> bool {
+        self.state == State::Enabled
+    }
+}

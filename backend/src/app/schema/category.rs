@@ -1,5 +1,6 @@
 use async_graphql::*;
 use entity::{category, prelude::*};
+use std::sync::Arc;
 
 #[derive(Default, Debug)]
 pub struct CategoryQuery;
@@ -12,7 +13,7 @@ impl CategoryQuery {
         #[graphql(default = 1)] page_no: u64,
         #[graphql(default = 200)] page_size: u64,
     ) -> Result<GCategoryList> {
-        let state = ctx.data::<crate::AppState>()?;
+        let state = ctx.data::<Arc<crate::AppState>>()?;
 
         // let mut condition = Condition::all().add(category::Column::Ancestry.is_null());
         let mut condition = Condition::all();
@@ -45,7 +46,7 @@ impl CategoryQuery {
         })
     }
     pub async fn category(&self, ctx: &Context<'_>, id: i32) -> Result<GraCategory> {
-        let state = ctx.data::<crate::AppState>()?;
+        let state = ctx.data::<Arc<crate::AppState>>()?;
         let g_category = Category::find()
             .select_only()
             .columns([
@@ -69,7 +70,7 @@ impl CategoryQuery {
 // #[Object]
 // impl CategoryMutation {
 //     pub async fn category_create(&self, ctx: &Context<'_>, input: GraCategoryCreate) -> Result<i32> {
-//         let state = ctx.data::<crate::AppState>()?;
+//         let state = ctx.data::<Arc<crate::AppState>>()?;
 //         let claims = ctx
 //             .data::<Option<crate::serve::jwt::Claims>>()?
 //             .as_ref()
@@ -92,7 +93,7 @@ impl CategoryQuery {
 //         Ok(category.id)
 //     }
 //     pub async fn category_update(&self, ctx: &Context<'_>, input: GraCategoryUpdate) -> Result<bool> {
-//         let state = ctx.data::<crate::AppState>()?;
+//         let state = ctx.data::<Arc<crate::AppState>>()?;
 //         let claims = ctx
 //             .data::<Option<crate::serve::jwt::Claims>>()?
 //             .as_ref()
@@ -118,7 +119,7 @@ impl CategoryQuery {
 //         Ok(true)
 //     }
 //     pub async fn category_delete(&self, ctx: &Context<'_>, id: i32) -> Result<bool> {
-//         let state = ctx.data::<crate::AppState>()?;
+//         let state = ctx.data::<Arc<crate::AppState>>()?;
 //         let claims = ctx
 //             .data::<Option<crate::serve::jwt::Claims>>()?
 //             .as_ref()

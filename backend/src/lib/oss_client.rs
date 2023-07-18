@@ -1,5 +1,5 @@
 use aliyun_oss_client::file::Files;
-use aliyun_oss_client::{Client, auth::QueryAuth};
+use aliyun_oss_client::{auth::QueryAuth, Client};
 // use std::ops::Deref;
 
 #[derive(Clone)]
@@ -28,8 +28,8 @@ impl OssClient {
         println!("respose: {:?}", response);
         Ok(())
     }
-		pub async fn signature_url(&self, path: String, duration: std::time::Duration) -> anyhow::Result<String> {	
-			let auth = QueryAuth::from(&self.0);
-			Ok(auth.to_url(&path.parse()?, chrono::Utc::now().timestamp() + duration.as_secs() as i64).to_string())
-		}
+    pub async fn signature_url(&self, path: String, duration: std::time::Duration) -> anyhow::Result<String> {
+        let auth = QueryAuth::from(&self.0);
+        Ok(auth.to_url(&path.parse()?, chrono::Utc::now().timestamp() + duration.as_secs() as i64).to_string())
+    }
 }

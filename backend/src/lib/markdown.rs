@@ -17,15 +17,15 @@ pub fn render_markdown_highlight_class<S: AsRef<str>>(src: S) -> anyhow::Result<
     let parser = Parser::new_ext(src, Options::all());
     let mut state = CodeHighlightingState::NotInCodeBlock;
 
-		let syntax_set = SyntaxSet::load_defaults_newlines();		
-		// use syntect::html::css_for_theme_with_class_style;
-		// let theme_set = ThemeSet::load_defaults();
-		// let dark_theme = &theme_set.themes["base16-ocean.dark"];
-		// let light_theme = &theme_set.themes["base16-ocean.light"];
-		// let css_dark = css_for_theme_with_class_style(dark_theme, ClassStyle::Spaced)?;
-		// let css_light = css_for_theme_with_class_style(light_theme, ClassStyle::Spaced)?;
-		// println!("css dark: {}", css_dark);
-		// println!("css light: {}", css_light);
+    let syntax_set = SyntaxSet::load_defaults_newlines();
+    // use syntect::html::css_for_theme_with_class_style;
+    // let theme_set = ThemeSet::load_defaults();
+    // let dark_theme = &theme_set.themes["base16-ocean.dark"];
+    // let light_theme = &theme_set.themes["base16-ocean.light"];
+    // let css_dark = css_for_theme_with_class_style(dark_theme, ClassStyle::Spaced)?;
+    // let css_light = css_for_theme_with_class_style(light_theme, ClassStyle::Spaced)?;
+    // println!("css dark: {}", css_dark);
+    // println!("css light: {}", css_light);
 
     let mut events = Vec::<Event>::with_capacity(src.len() * 2);
     for event in parser {
@@ -98,19 +98,19 @@ pub fn render_markdown_highlight_style<S: AsRef<str>>(src: S, is_dark: bool) -> 
     let src = src.as_ref();
     let parser = Parser::new_ext(src, Options::all());
     let mut events = Vec::<Event>::with_capacity(src.len() * 2);
-		let mut in_code_block = false;
-		let mut to_highlight = String::new();
+    let mut in_code_block = false;
+    let mut to_highlight = String::new();
 
-		let syntax_set = SyntaxSet::load_defaults_newlines();
+    let syntax_set = SyntaxSet::load_defaults_newlines();
     let theme_set = ThemeSet::load_defaults();
     let syntax = syntax_set.find_syntax_by_extension("rs").unwrap();
     let theme = {
-			if is_dark {
-				&theme_set.themes["base16-ocean.dark"]
-			} else {
-				&theme_set.themes["base16-ocean.light"]
-			}
-		};
+        if is_dark {
+            &theme_set.themes["base16-ocean.dark"]
+        } else {
+            &theme_set.themes["base16-ocean.light"]
+        }
+    };
 
     for event in parser {
         match event {
@@ -133,26 +133,23 @@ pub fn render_markdown_highlight_style<S: AsRef<str>>(src: S, is_dark: bool) -> 
                     // If we're in a code block, build up the string of text
                     to_highlight.push_str(&t);
                 } else {
-									events.push(Event::Text(t))
+                    events.push(Event::Text(t))
                 }
             }
             e => {
-							events.push(e);
+                events.push(e);
             }
         }
     }
 
-
-		let mut ret = String::new();
+    let mut ret = String::new();
     html::push_html(&mut ret, events.into_iter());
-		Ok(ret)
-
+    Ok(ret)
 }
 
-
 pub fn render_markdown<S: AsRef<str>>(src: S) -> String {
-	let parser = pulldown_cmark::Parser::new(src.as_ref());
-	let mut html_output = String::new();
-	pulldown_cmark::html::push_html(&mut html_output, parser);
-	html_output
+    let parser = pulldown_cmark::Parser::new(src.as_ref());
+    let mut html_output = String::new();
+    pulldown_cmark::html::push_html(&mut html_output, parser);
+    html_output
 }

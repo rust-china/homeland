@@ -6,12 +6,13 @@ use axum::{
     Json, Router,
 };
 use entity::{prelude::*, storage};
+use std::sync::Arc;
 
-pub fn routes() -> Router<crate::AppState> {
+pub fn routes() -> Router<Arc<crate::AppState>> {
     Router::new()
         .route(
             "/*path",
-            get(|Path(path): Path<String>, State(state): State<crate::AppState>| async move {
+            get(|Path(path): Path<String>, State(state): State<Arc<crate::AppState>>| async move {
                 if let Ok(Some(db_storage)) = Storage::find()
                     .filter(storage::Column::Path.eq(path.clone()))
                     .into_model::<storage::Model>()
@@ -36,7 +37,7 @@ pub fn routes() -> Router<crate::AppState> {
         .route("/upload", post(upload))
 }
 
-pub(crate) async fn upload(State(state): State<crate::AppState>, claims: crate::serve::jwt::Claims, mut multipart: Multipart) -> Result<impl IntoResponse, crate::Error> {
+pub(crate) async fn upload(State(state): State<Arc<crate::AppState>>, claims: crate::serve::jwt::Claims, mut multipart: Multipart) -> Result<impl IntoResponse, crate::Error> {
     let sub = claims.sub;
     if let Some(file) = multipart.next_field().await.map_err(|err| crate::Error::Message(err.to_string()))? {
         let filename = file.file_name().unwrap().to_string(); // 上传的文件名

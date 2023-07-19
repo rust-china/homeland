@@ -15,8 +15,8 @@ pub struct Model {
     pub content_type: Option<String>,
     pub visited_count: i32,
     pub today_visited_count: i32,
-    pub created_at: DateTime,
-    pub updated_at: DateTime,
+    pub created_at: DateTimeWithTimeZone,
+    pub updated_at: DateTimeWithTimeZone,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
@@ -48,7 +48,7 @@ impl Model {
         } else {
             active.today_visited_count = Set(0);
         }
-        active.updated_at = Set(chrono::Utc::now().naive_utc());
+        active.updated_at = Set(DateTimeWithTimeZone::from(chrono::Utc::now()));
         active
     }
 }

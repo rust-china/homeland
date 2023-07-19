@@ -19,11 +19,11 @@ pub struct Model {
     pub read_count: i32,
     pub like_count: i32,
     pub comment_count: i32,
-    pub last_comment_at: Option<DateTime>,
     pub extra_data: Option<Json>,
-    pub deleted_at: Option<DateTime>,
-    pub created_at: DateTime,
-    pub updated_at: DateTime,
+    pub last_comment_at: Option<DateTimeWithTimeZone>,
+    pub deleted_at: Option<DateTimeWithTimeZone>,
+    pub created_at: DateTimeWithTimeZone,
+    pub updated_at: DateTimeWithTimeZone,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

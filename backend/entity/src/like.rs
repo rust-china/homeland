@@ -20,8 +20,8 @@ pub struct Model {
     pub user_id: i32,
     pub like_able_id: i32,
     pub like_able_type: LikeAbleType,
-    pub created_at: DateTime,
-    pub updated_at: DateTime,
+    pub created_at: DateTimeWithTimeZone,
+    pub updated_at: DateTimeWithTimeZone,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

@@ -23,8 +23,8 @@ pub struct Model {
     pub github_data: Option<Json>,
     pub extra_data: Option<Json>,
     pub state: State,
-    pub created_at: DateTime,
-    pub updated_at: DateTime,
+    pub created_at: DateTimeWithTimeZone,
+    pub updated_at: DateTimeWithTimeZone,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

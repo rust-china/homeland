@@ -20,8 +20,8 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(User::GithubData).json())
                     .col(ColumnDef::new(User::ExtraData).json())
                     .col(ColumnDef::new(User::State).integer().not_null().default(1))
-                    .col(ColumnDef::new(User::CreatedAt).timestamp().default(Expr::current_timestamp()).not_null())
-                    .col(ColumnDef::new(User::UpdatedAt).timestamp().default(Expr::current_timestamp()).not_null())
+                    .col(ColumnDef::new(User::CreatedAt).timestamp_with_time_zone().default(Expr::current_timestamp()).not_null())
+                    .col(ColumnDef::new(User::UpdatedAt).timestamp_with_time_zone().default(Expr::current_timestamp()).not_null())
                     .to_owned(),
             )
             .await?;
@@ -45,8 +45,8 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Category::Name).string().not_null())
                     .col(ColumnDef::new(Category::Position).integer().not_null().default(0))
                     .col(ColumnDef::new(Category::Ancestry).string())
-                    .col(ColumnDef::new(Category::CreatedAt).timestamp().default(Expr::current_timestamp()).not_null())
-                    .col(ColumnDef::new(Category::UpdatedAt).timestamp().default(Expr::current_timestamp()).not_null())
+                    .col(ColumnDef::new(Category::CreatedAt).timestamp_with_time_zone().default(Expr::current_timestamp()).not_null())
+                    .col(ColumnDef::new(Category::UpdatedAt).timestamp_with_time_zone().default(Expr::current_timestamp()).not_null())
                     .to_owned(),
             )
             .await?;
@@ -73,11 +73,11 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Post::ReadCount).integer().not_null().default(0))
                     .col(ColumnDef::new(Post::LikeCount).integer().not_null().default(0))
                     .col(ColumnDef::new(Post::CommentCount).integer().not_null().default(0))
-                    .col(ColumnDef::new(Post::LastCommentAt).timestamp())
                     .col(ColumnDef::new(Post::ExtraData).json())
-                    .col(ColumnDef::new(Post::DeletedAt).timestamp())
-                    .col(ColumnDef::new(Post::CreatedAt).timestamp().default(Expr::current_timestamp()).not_null())
-                    .col(ColumnDef::new(Post::UpdatedAt).timestamp().default(Expr::current_timestamp()).not_null())
+                    .col(ColumnDef::new(Post::LastCommentAt).timestamp_with_time_zone())
+                    .col(ColumnDef::new(Post::DeletedAt).timestamp_with_time_zone())
+                    .col(ColumnDef::new(Post::CreatedAt).timestamp_with_time_zone().default(Expr::current_timestamp()).not_null())
+                    .col(ColumnDef::new(Post::UpdatedAt).timestamp_with_time_zone().default(Expr::current_timestamp()).not_null())
                     .to_owned(),
             )
             .await?;
@@ -109,9 +109,9 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Comment::Ancestry).string())
                     .col(ColumnDef::new(Comment::Body).string().not_null())
                     .col(ColumnDef::new(Comment::ExtraData).json())
-                    .col(ColumnDef::new(Comment::DeletedAt).timestamp())
-                    .col(ColumnDef::new(Comment::CreatedAt).timestamp().default(Expr::current_timestamp()).not_null())
-                    .col(ColumnDef::new(Comment::UpdatedAt).timestamp().default(Expr::current_timestamp()).not_null())
+                    .col(ColumnDef::new(Comment::DeletedAt).timestamp_with_time_zone())
+                    .col(ColumnDef::new(Comment::CreatedAt).timestamp_with_time_zone().default(Expr::current_timestamp()).not_null())
+                    .col(ColumnDef::new(Comment::UpdatedAt).timestamp_with_time_zone().default(Expr::current_timestamp()).not_null())
                     .to_owned(),
             )
             .await?;
@@ -131,8 +131,8 @@ impl MigrationTrait for Migration {
                     )
                     .col(ColumnDef::new(Like::LikeAbleId).integer().not_null())
                     .col(ColumnDef::new(Like::LikeAbleType).string().not_null())
-                    .col(ColumnDef::new(Like::CreatedAt).timestamp().default(Expr::current_timestamp()).not_null())
-                    .col(ColumnDef::new(Like::UpdatedAt).timestamp().default(Expr::current_timestamp()).not_null())
+                    .col(ColumnDef::new(Like::CreatedAt).timestamp_with_time_zone().default(Expr::current_timestamp()).not_null())
+                    .col(ColumnDef::new(Like::UpdatedAt).timestamp_with_time_zone().default(Expr::current_timestamp()).not_null())
                     .to_owned(),
             )
             .await?;
@@ -162,8 +162,8 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Notification::NotificationableType).string())
                     .col(ColumnDef::new(Notification::Read).boolean().not_null().default(false))
                     .col(ColumnDef::new(Notification::ExtraData).json())
-                    .col(ColumnDef::new(Notification::CreatedAt).timestamp().default(Expr::current_timestamp()).not_null())
-                    .col(ColumnDef::new(Notification::UpdatedAt).timestamp().default(Expr::current_timestamp()).not_null())
+                    .col(ColumnDef::new(Notification::CreatedAt).timestamp_with_time_zone().default(Expr::current_timestamp()).not_null())
+                    .col(ColumnDef::new(Notification::UpdatedAt).timestamp_with_time_zone().default(Expr::current_timestamp()).not_null())
                     .to_owned(),
             )
             .await?;
@@ -187,8 +187,8 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(Storage::Size).not_null().integer())
                     .col(ColumnDef::new(Storage::VisitedCount).not_null().integer().default(0))
                     .col(ColumnDef::new(Storage::TodayVisitedCount).not_null().integer().default(0))
-                    .col(ColumnDef::new(Storage::CreatedAt).timestamp().default(Expr::current_timestamp()).not_null())
-                    .col(ColumnDef::new(Storage::UpdatedAt).timestamp().default(Expr::current_timestamp()).not_null())
+                    .col(ColumnDef::new(Storage::CreatedAt).timestamp_with_time_zone().default(Expr::current_timestamp()).not_null())
+                    .col(ColumnDef::new(Storage::UpdatedAt).timestamp_with_time_zone().default(Expr::current_timestamp()).not_null())
                     .to_owned(),
             )
             .await?;

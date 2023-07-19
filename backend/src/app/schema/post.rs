@@ -137,7 +137,7 @@ impl PostMutation {
         post.category_id = Set(input.category_id);
         post.title = Set(input.title);
         post.body = Set(input.body);
-        post.updated_at = Set(chrono::Utc::now().naive_utc());
+        post.updated_at = Set(DateTimeWithTimeZone::from(chrono::Utc::now()));
         let post: post::Model = post.update(&state.db_conn).await?;
 
         SimpleBroker::publish(GraSPostChange {
@@ -221,9 +221,9 @@ pub struct GraPost {
     read_count: i32,
     like_count: i32,
     comment_count: i32,
-    last_comment_at: Option<chrono::NaiveDateTime>,
-    updated_at: chrono::NaiveDateTime,
-    created_at: chrono::NaiveDateTime,
+    last_comment_at: Option<DateTimeWithTimeZone>,
+    updated_at: DateTimeWithTimeZone,
+    created_at: DateTimeWithTimeZone,
 }
 #[ComplexObject]
 impl GraPost {

@@ -14,8 +14,8 @@ pub struct Model {
     pub notificationable_type: Option<String>,
     pub read: bool,
     pub extra_data: Option<Json>,
-    pub created_at: DateTime,
-    pub updated_at: DateTime,
+    pub created_at: DateTimeWithTimeZone,
+    pub updated_at: DateTimeWithTimeZone,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]

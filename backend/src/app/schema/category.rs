@@ -143,8 +143,8 @@ pub struct GraCategory {
     code: String,
     ancestry: Option<String>,
     parent_id: Option<i32>,
-    updated_at: chrono::NaiveDateTime,
-    created_at: chrono::NaiveDateTime,
+    updated_at: DateTimeWithTimeZone,
+    created_at: DateTimeWithTimeZone,
 }
 
 #[derive(SimpleObject)]

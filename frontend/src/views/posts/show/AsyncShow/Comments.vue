@@ -3,9 +3,12 @@ import { useList } from '@/utils/hooks/useList'
 import { useUserStore } from '@/stores/user'
 import { graphqlApi } from '@/api'
 import { trimQuery } from '@/utils/libs'
-import dayjs from 'dayjs'
 import { emitter } from '@/utils/emitter'
+import { useDialog } from '@/utils/hooks/useDialog'
+import { MessagePlugin } from 'tdesign-vue-next';
+import Comment from './components/Comment.vue'
 
+const dialog = useDialog()
 const route = useRoute()
 const userStore = useUserStore()
 
@@ -20,6 +23,10 @@ const listState = useList({
 							id,
 							bodyHtml,
 							user,
+							commentCount,
+							likeCount,
+							ancestry,
+							parentId,
 							updatedAt,
 							createdAt,
 						},
@@ -45,34 +52,45 @@ const listState = useList({
 	}
 })
 
-const fetchComment = async (commentId: any) => {
-	const { data: rData } = await graphqlApi({
-		query: `
-			query CommentQuery($id: Int!) {
-					comment(id: $id) {
-						id,
-						bodyHtml,
-						user,
-						updatedAt,
-						createdAt,
+const refetchComments = async () => {
+	listState.onLoad()
+}
+
+const onDestroy = (record: any) => {
+	const instance = dialog.create({
+		header: '确认',
+		async onConfirm() {
+			await graphqlApi({
+				query: `
+					mutation CommentDelete($id: Int!) {
+						commentDelete(id: $id)
 					}
+				`,
+				variables: {
+					id: record.id
 				}
-			`,
-		variables: {
-			id: commentId
+			})
+			listState.records = listState.records.filter(item => item.id !== record.id)
+			listState.pagination.total -= 1
+			instance.close()
+			MessagePlugin.success("删除成功")
+		},
+		slots: {
+			default: () => (
+				<span>确定要删除评论吗？</span>
+			)
 		}
 	})
-	listState.records.push(rData.data.comment)
-	listState.pagination.total += 1
+	// console.log(instance)
 }
 
 onMounted(() => {
 	userInfo.value = userStore.userInfo
-	emitter.on('newComment', fetchComment)
+	emitter.on('newRootComment', refetchComments)
 })
 
 onUnmounted(() => {
-	emitter.off('newComment', fetchComment)
+	emitter.off('newRootComment', refetchComments)
 })
 
 await listState.onLoad()
@@ -82,36 +100,16 @@ await listState.onLoad()
 	<main class="comments">
 		<template v-if="listState.records.length">
 			<t-list :split="true">
-				<template v-for="(comment, idx) in listState.records" :key="comment.uuid">
+				<!-- <template #header> 通过 Slot 插入的 Header </template> -->
+				<template v-for="comment in listState.records" :key="comment.id">
 					<t-list-item>
-						<div class="w-full flex gap-5">
-							<div class="left-panel flex-1">
-								<div class="title">
-									<t-space size="small">
-										<span class="opacity-30 text-sm">{{ comment.user.name || comment.user.username }}</span>
-										<span class="text-sm">#{{ (listState.pagination.pageNo - 1) * listState.pagination.pageSize + idx + 1
-										}}</span>
-										<span class="opacity-50 text-xs">更新于：{{ dayjs(comment.updatedAt).format('YYYY-MM-DD HH:mm:ss')
-										}}</span>
-									</t-space>
-								</div>
-								<div class="description">
-									<div class="html-render markdown-body w-full" v-html="comment?.bodyHtml"></div>
-								</div>
-							</div>
-							<div class="right-panel">
-								<template v-if="comment.user.id === userInfo?.id">
-									<t-space size="small">
-										<t-button size="small">编辑</t-button>
-										<t-button size="small" theme="danger">删除</t-button>
-									</t-space>
-								</template>
-							</div>
-						</div>
+						<Comment :comment="comment" :loginInfo="userInfo" @destroy="onDestroy"></Comment>
 					</t-list-item>
 				</template>
+				<template #footer>
+					<t-pagination class="mt-3" size="small" show-jumper v-bind="listState.pagination" />
+				</template>
 			</t-list>
-			<t-pagination class="mt-3" show-jumper v-bind="listState.pagination" />
 		</template>
 		<template v-else>暂无评论</template>
 	</main>

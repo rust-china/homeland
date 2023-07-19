@@ -77,7 +77,7 @@ where
                 _ => Err(crate::Error::RespMessage(401, "user not found".into())),
             }
         } else {
-            return Err(crate::Error::RespMessage(401, "token not exists".into()));
+            Err(crate::Error::RespMessage(401, "token not exists".into()))
         }
     }
 }

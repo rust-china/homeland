@@ -50,7 +50,7 @@ impl MigrationTrait for Migration {
                     .to_owned(),
             )
             .await?;
-
+        // post
         manager
             .create_table(
                 Table::create()
@@ -83,7 +83,7 @@ impl MigrationTrait for Migration {
             .await?;
         let title_idx = sea_query::Index::create().name("idx-post-title").table(Post::Table).col(Post::Title).to_owned();
         manager.create_index(title_idx).await?;
-
+        // comment
         manager
             .create_table(
                 Table::create()
@@ -104,12 +104,35 @@ impl MigrationTrait for Migration {
                             .from(Comment::Table, Comment::PostId)
                             .to(Post::Table, Post::Id),
                     )
+                    .col(ColumnDef::new(Comment::LikeCount).integer().not_null().default(0))
+                    .col(ColumnDef::new(Comment::CommentCount).integer().not_null().default(0))
                     .col(ColumnDef::new(Comment::Ancestry).string())
                     .col(ColumnDef::new(Comment::Body).string().not_null())
                     .col(ColumnDef::new(Comment::ExtraData).json())
                     .col(ColumnDef::new(Comment::DeletedAt).timestamp())
                     .col(ColumnDef::new(Comment::CreatedAt).timestamp().default(Expr::current_timestamp()).not_null())
                     .col(ColumnDef::new(Comment::UpdatedAt).timestamp().default(Expr::current_timestamp()).not_null())
+                    .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                Table::create()
+                    .table(Like::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(Like::Id).integer().not_null().auto_increment().primary_key())
+                    .col(ColumnDef::new(Like::UserId).integer().not_null())
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk-like-user_id")
+                            .from(Like::Table, Like::UserId)
+                            .to(User::Table, User::Id),
+                    )
+                    .col(ColumnDef::new(Like::LikeAbleId).integer().not_null())
+                    .col(ColumnDef::new(Like::LikeAbleType).string().not_null())
+                    .col(ColumnDef::new(Like::CreatedAt).timestamp().default(Expr::current_timestamp()).not_null())
+                    .col(ColumnDef::new(Like::UpdatedAt).timestamp().default(Expr::current_timestamp()).not_null())
                     .to_owned(),
             )
             .await?;
@@ -240,8 +263,10 @@ enum Comment {
     UserId,
     PostId,
     Body,
-    ExtraData,
+    CommentCount,
+    LikeCount,
     Ancestry,
+    ExtraData,
     DeletedAt,
     CreatedAt,
     UpdatedAt,
@@ -257,6 +282,17 @@ enum Notification {
     NotificationableId,
     Read,
     ExtraData,
+    CreatedAt,
+    UpdatedAt,
+}
+
+#[derive(Iden)]
+enum Like {
+    Table,
+    Id,
+    UserId,
+    LikeAbleType,
+    LikeAbleId,
     CreatedAt,
     UpdatedAt,
 }

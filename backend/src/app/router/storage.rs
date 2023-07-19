@@ -20,8 +20,7 @@ pub fn routes() -> Router<Arc<crate::AppState>> {
                     .await
                 {
                     if db_storage.today_visited_count < 10_000 {
-                        let mut storage: storage::ActiveModel = db_storage.clone().into();
-                        storage.update_visit(&db_storage);
+                        let storage = db_storage.update_visit();
                         storage.update(&state.db_conn).await?;
 
                         let signed_url = state.oss_client.signature_url(path, std::time::Duration::from_secs(7200)).await.unwrap();

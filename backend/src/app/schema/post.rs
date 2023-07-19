@@ -94,8 +94,10 @@ impl PostMutation {
     pub async fn post_create(&self, ctx: &Context<'_>, input: GraPostCreate) -> Result<String> {
         let state = ctx.data::<Arc<crate::AppState>>()?;
         let claims = ctx
-            .data::<crate::serve::jwt::Claims>()
-            .map_err(|_err| crate::Error::RespMessage(422, String::from("无权限")))?;
+            .data::<Option<crate::serve::jwt::Claims>>()?
+            .as_ref()
+            .ok_or_else(|| crate::Error::Message("should login".into()))
+            .map_err(|e| e.extend_with(|_, e| e.set("code", 401)))?;
 
         let post = post::ActiveModel {
             title: Set(input.title),
@@ -116,8 +118,10 @@ impl PostMutation {
     pub async fn post_update(&self, ctx: &Context<'_>, input: GraPostUpdate) -> Result<bool> {
         let state = ctx.data::<Arc<crate::AppState>>()?;
         let claims = ctx
-            .data::<crate::serve::jwt::Claims>()
-            .map_err(|_err| crate::Error::RespMessage(422, String::from("无权限")))?;
+            .data::<Option<crate::serve::jwt::Claims>>()?
+            .as_ref()
+            .ok_or_else(|| crate::Error::Message("should login".into()))
+            .map_err(|e| e.extend_with(|_, e| e.set("code", 401)))?;
 
         // let post = post::Entity::find_by_id(id).one(&state.db_conn).await?;
         let post = Post::find()

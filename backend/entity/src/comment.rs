@@ -12,6 +12,8 @@ pub struct Model {
     pub post_id: i32,
     pub ancestry: Option<String>,
     pub body: String,
+    pub like_count: i32,
+    pub comment_count: i32,
     pub extra_data: Option<Json>,
     pub deleted_at: Option<DateTime>,
     pub created_at: DateTime,

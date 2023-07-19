@@ -8,8 +8,8 @@ use error::Error;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let _ = dotenvy::from_filename(".env.local"); // 先加载优先级更高
-    dotenvy::from_filename(".env")?;
+    dotenvy::from_filename_override(".env")?;
+    let _ = dotenvy::from_filename_override(".env.local");
     logger::logging()?;
     
     let _ = app::APP_STATE.get_or_try_init(|| async move {

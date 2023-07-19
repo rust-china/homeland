@@ -7,18 +7,20 @@ import 'github-markdown-css/github-markdown.css'
 import hljs from 'highlight.js'
 import dayjs from 'dayjs'
 import Comments from './Comments.vue'
-import NewComment from './NewComment.vue'
+import NewComment from './components/NewComment.vue'
+import IdentAvatar from '@/components/shared/IdentAvatar.vue'
 
 export default defineComponent({
 	components: {
 		Comments,
 		NewComment,
+		IdentAvatar,
 	},
 	async setup(_ctx) {
 		const userStore = useUserStore()
 		const route = useRoute();
 		const router = useRouter();
-		
+
 		const userInfo = ref<any>(null)
 		const post = ref<any>(null)
 		const fetchPost = async () => {
@@ -29,6 +31,8 @@ export default defineComponent({
 							uuid,
 							title,
 							user,
+							likeCount,
+							commentCount,
 							category,
 							bodyHtml,
 							updatedAt,
@@ -54,7 +58,7 @@ export default defineComponent({
 	},
 	mounted() {
 		this.userInfo = this.userStore.userInfo
-		hljs.highlightAll()	
+		hljs.highlightAll()
 	}
 })
 </script>
@@ -87,18 +91,35 @@ export default defineComponent({
 					<template v-if="userInfo?.id === post.user?.id">
 						<div class="mb-4">
 							<t-card class="card">
-								<t-button block theme="primary" variant="base" @click="router.push({ name: 'posts/edit', params: { uuid: post.uuid } })">编辑</t-button>
+								<t-button block theme="primary" variant="base"
+									@click="router.push({ name: 'posts/edit', params: { uuid: post.uuid } })">编辑帖子</t-button>
 							</t-card>
 						</div>
 					</template>
 					<div class="mb-4">
 						<t-card class="card">
-							{{ post?.user }}
+							<t-list :split="false">
+								<t-list-item>
+									<t-list-item-meta :title="post?.user.username">
+										<template #image>
+											<IdentAvatar :ident="post?.user.username"></IdentAvatar>
+										</template>
+										<template #description>
+											<p class="text-sm">{{ dayjs(post.user.createdAt).format('YYYY-MM-DD HH:mm:ss') }}</p>
+										</template>
+									</t-list-item-meta>
+								</t-list-item>
+							</t-list>
 						</t-card>
 					</div>
 					<div class="mb-4">
 						<t-card class="card">
-							点赞
+							<t-button variant="text" :theme="'default'" ghost>
+								<span class="flex items-center">
+									<t-icon name="thumb-up" style="font-size: 32px;" />
+									<span>{{ post.likeCount }}</span>
+								</span>
+							</t-button>
 						</t-card>
 					</div>
 				</div>

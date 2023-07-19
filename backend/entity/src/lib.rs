@@ -4,6 +4,7 @@ pub mod prelude;
 
 pub mod category;
 pub mod comment;
+pub mod like;
 pub mod notification;
 pub mod post;
 pub mod storage;

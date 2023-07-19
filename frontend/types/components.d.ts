@@ -13,6 +13,8 @@ declare module 'vue' {
     TButton: typeof import('tdesign-vue-next')['Button']
     TCard: typeof import('tdesign-vue-next')['Card']
     TCascader: typeof import('tdesign-vue-next')['Cascader']
+    TComment: typeof import('tdesign-vue-next')['Comment']
+    TDivider: typeof import('tdesign-vue-next')['Divider']
     TDropdown: typeof import('tdesign-vue-next')['Dropdown']
     TForm: typeof import('tdesign-vue-next')['Form']
     TFormItem: typeof import('tdesign-vue-next')['FormItem']

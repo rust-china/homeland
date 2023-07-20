@@ -99,6 +99,7 @@ onMounted(() => {
 			}
 		},
 		preview: {
+			delay: 300,
 			actions: [],
 			hljs: {
 				defaultLang: 'Rust'
@@ -122,7 +123,7 @@ onMounted(() => {
 					vditor?.setValue(props.modelValue)
 				}
 			})
-		}, 100)
+		}, 500)
 	})
 
 

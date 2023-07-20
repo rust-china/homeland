@@ -3,6 +3,8 @@ import { useList } from '@/utils/hooks/useList'
 import { graphqlApi } from '@/api'
 import { trimQuery } from '@/utils/libs'
 import dayjs from 'dayjs'
+import hljs from 'highlight.js'
+import mermaid from 'mermaid'
 import { useDialog } from '@/utils/hooks/useDialog'
 import NewComment from './NewComment.vue'
 import { MessagePlugin } from 'tdesign-vue-next';
@@ -24,6 +26,7 @@ const Comment = defineComponent({
 		const dialogState = inject('dialogState', null)
 		const route = useRoute()
 		const dialog = useDialog()
+		const commentBodyRef = ref<any>();
 		const listState = useList({
 			query: {
 				ancestry: props.comment.ancestry ? `${props.comment.ancestry}/${props.comment.id}` : `/${props.comment.id}`
@@ -157,11 +160,23 @@ const Comment = defineComponent({
 			dialogState,
 			remainingQuantity,
 			listState,
+			commentBodyRef,
 			onReply,
 			onSubDestroy,
 			onLikeComment,
 		}
-	}
+	},
+	mounted() {
+		this.commentBodyRef.querySelectorAll('pre code').forEach((el: HTMLElement) => {
+			if (!el.classList.contains('language-mermaid')) {
+				hljs.highlightElement(el)
+			}
+		})
+		mermaid.initialize({ startOnLoad: false })
+		mermaid.run({
+			nodes: this.commentBodyRef.querySelectorAll('pre code.language-mermaid'),
+		});
+	},
 })
 export default Comment
 </script>
@@ -177,7 +192,7 @@ export default Comment
 			</template>
 			<template #datetime>{{ dayjs(comment.updatedAt).format('YYYY-MM-DD HH:mm:ss') }}</template>
 			<template #content>
-				<div class="html-render markdown-body w-full p-1" v-html="comment?.bodyHtml"></div>
+				<div ref="commentBodyRef" class="comment-body-render html-render markdown-body w-full p-1" v-html="comment?.bodyHtml"></div>
 			</template>
 			<template #actions>
 				<t-space key="thumbUp" :size="6" @click="onLikeComment(comment)">

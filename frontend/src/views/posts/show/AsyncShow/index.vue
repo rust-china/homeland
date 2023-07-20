@@ -5,6 +5,7 @@ import DOMPurify from 'isomorphic-dompurify';
 import 'github-markdown-css/github-markdown.css'
 // import '@/assets/stylesheets/syntect-highlight-code/syntect-highlight-code.scss'
 import hljs from 'highlight.js'
+import mermaid from 'mermaid'
 import dayjs from 'dayjs'
 import Comments from './Comments.vue'
 import NewComment from './components/NewComment.vue'
@@ -21,6 +22,7 @@ export default defineComponent({
 		const route = useRoute();
 		const router = useRouter();
 
+		const postBodyRef = ref<any>()
 		const userInfo = ref<any>(null)
 		const post = ref<any>(null)
 		const fetchPost = async () => {
@@ -69,11 +71,19 @@ export default defineComponent({
 		}
 
 		await fetchPost()
-		return { dayjs, route, router, userInfo, userStore, post, onLikePost }
+		return { dayjs, route, router, userInfo, userStore, post, postBodyRef, onLikePost }
 	},
 	mounted() {
 		this.userInfo = this.userStore.userInfo
-		hljs.highlightAll()
+		this.postBodyRef.querySelectorAll('pre code').forEach((el: HTMLElement) => {
+			if (!el.classList.contains('language-mermaid')) {
+				hljs.highlightElement(el)
+			}
+		})
+		mermaid.initialize({ startOnLoad: false })
+		mermaid.run({
+			nodes: this.postBodyRef.querySelectorAll('pre code.language-mermaid'),
+		});
 	}
 })
 </script>
@@ -93,7 +103,7 @@ export default defineComponent({
 								<span>最后更新于：{{ dayjs(post.updatedAt).format('YYYY-MM-DD HH:mm:ss') }}</span>
 							</t-space>
 						</template>
-						<div class="html-render markdown-body" v-html="post?.bodyHtml"></div>
+						<div ref="postBodyRef" class="post-body-render html-render markdown-body" v-html="post?.bodyHtml"></div>
 					</t-card>
 					<t-card bordered class="card mt-5">
 						<Comments></Comments>

@@ -40,6 +40,7 @@ const Comment = defineComponent({
 									user,
 									ancestry,
 									parentId,
+									isLike,
 									likeCount,
 									commentCount,
 									updatedAt,
@@ -99,6 +100,8 @@ const Comment = defineComponent({
 						}
 					})
 					listState.records = listState.records.filter(item => item.id !== record.id)
+					// eslint-disable-next-line vue/no-mutating-props
+					props.comment.commentCount -= 1;
 					listState.onLoad()
 					instance.close()
 					MessagePlugin.success("删除成功")
@@ -124,7 +127,6 @@ const Comment = defineComponent({
 							<Comment comment={record}></Comment>
 							<t-divider></t-divider>
 							<NewComment parentComment={record} onSubmited={() => {
-								console.log(listState.pagination.pageNo, 3)
 								listState.onLoad({ pageNo: listState.pagination.pageNo || 1 })
 								// eslint-disable-next-line vue/no-mutating-props
 								props.comment.commentCount += 1
@@ -136,6 +138,20 @@ const Comment = defineComponent({
 			})
 		}
 
+		const onLikeComment = async (comment: any) => {
+			const { data: rData } = await graphqlApi({
+				query: `
+					mutation GCommentLike($id: Int!) {
+						commentLike(id: $id)
+					}
+				`,
+				variables: {
+					id: comment.id
+				}
+			})
+			Object.assign(comment, rData.data.commentLike)
+		}
+
 		return {
 			dayjs,
 			dialogState,
@@ -143,6 +159,7 @@ const Comment = defineComponent({
 			listState,
 			onReply,
 			onSubDestroy,
+			onLikeComment,
 		}
 	}
 })
@@ -163,7 +180,7 @@ export default Comment
 				<div class="html-render markdown-body w-full p-1" v-html="comment?.bodyHtml"></div>
 			</template>
 			<template #actions>
-				<t-space key="thumbUp" :size="6">
+				<t-space key="thumbUp" :size="6" @click="onLikeComment(comment)">
 					<t-icon name="thumb-up" />
 					<span>{{ comment.likeCount }}</span>
 				</t-space>

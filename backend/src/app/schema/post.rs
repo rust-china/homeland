@@ -1,5 +1,5 @@
 use async_graphql::*;
-use entity::{category, post, prelude::*, user};
+use entity::{category, like, post, prelude::*, user};
 use std::sync::Arc;
 // use futures_util::StreamExt;
 use std::time::Duration;
@@ -45,6 +45,7 @@ impl PostQuery {
             .await?
             .into_iter()
             .map(|model| GraPost {
+                id: model.id,
                 uuid: model.uuid.to_string(),
                 title: model.title,
                 body: None,
@@ -66,23 +67,25 @@ impl PostQuery {
     }
     pub async fn post(&self, ctx: &Context<'_>, uuid: String) -> Result<GraPost> {
         let state = ctx.data::<Arc<crate::AppState>>()?;
+
         let uuid = Uuid::parse_str(&uuid)?;
-        let model = Post::find_by_uuid(uuid)
+        let db_post = Post::find_by_uuid(uuid)
             .one(&state.db_conn)
             .await?
             .ok_or_else(|| Error::new_with_source(crate::Error::Message("post not exists".into())))?;
         Ok(GraPost {
-            uuid: model.uuid.to_string(),
-            title: model.title,
-            body: Some(model.body),
-            user_id: model.user_id,
-            category_id: model.category_id,
-            read_count: model.read_count,
-            like_count: model.like_count,
-            comment_count: model.comment_count,
-            last_comment_at: model.last_comment_at,
-            updated_at: model.updated_at,
-            created_at: model.created_at,
+            id: db_post.id,
+            uuid: db_post.uuid.to_string(),
+            title: db_post.title,
+            body: Some(db_post.body),
+            user_id: db_post.user_id,
+            category_id: db_post.category_id,
+            read_count: db_post.read_count,
+            like_count: db_post.like_count,
+            comment_count: db_post.comment_count,
+            last_comment_at: db_post.last_comment_at,
+            updated_at: db_post.updated_at,
+            created_at: db_post.created_at,
         })
     }
 }
@@ -147,11 +150,66 @@ impl PostMutation {
 
         Ok(true)
     }
+    pub async fn post_like(&self, ctx: &Context<'_>, uuid: String) -> Result<serde_json::Value> {
+        let state = ctx.data::<Arc<crate::AppState>>()?;
+        let claims = ctx
+            .data::<Option<crate::serve::jwt::Claims>>()?
+            .as_ref()
+            .ok_or_else(|| crate::Error::Message("请登录".into()))
+            .map_err(|e| e.extend_with(|_, e| e.set("code", 401)))?;
+
+        let uuid = Uuid::parse_str(&uuid)?;
+        let db_post = Post::find_by_uuid(uuid)
+            .one(&state.db_conn)
+            .await?
+            .ok_or_else(|| Error::new_with_source(crate::Error::Message("post not exists".into())))?;
+
+        let db_like = Like::find()
+            .filter(
+                Condition::all()
+                    .add(like::Column::UserId.eq(claims.sub.user_id))
+                    .add(like::Column::LikeAbleType.eq(like::LikeAbleType::Post))
+                    .add(like::Column::LikeAbleId.eq(db_post.id)),
+            )
+            .one(&state.db_conn)
+            .await?;
+        if let Some(db_like) = db_like {
+            db_like.delete(&state.db_conn).await?;
+            let like_count = db_post.like_count - 1;
+            let mut post: post::ActiveModel = db_post.into();
+            post.like_count = Set(like_count);
+            post.save(&state.db_conn).await?;
+
+            let mut json: serde_json::Value = serde_json::from_str(r#"{}"#).unwrap();
+            json["isLike"] = serde_json::json!(false);
+            json["likeCount"] = serde_json::json!(like_count);
+            Ok(json)
+        } else {
+            let like = like::ActiveModel {
+                user_id: Set(claims.sub.user_id),
+                like_able_type: Set(like::LikeAbleType::Post),
+                like_able_id: Set(db_post.id),
+                ..Default::default()
+            };
+            like.save(&state.db_conn).await?;
+            let like_count = db_post.like_count + 1;
+            let mut post: post::ActiveModel = db_post.into();
+            post.like_count = Set(like_count);
+            post.save(&state.db_conn).await?;
+
+            let mut json: serde_json::Value = serde_json::from_str(r#"{}"#).unwrap();
+            json["isLike"] = serde_json::json!(true);
+            json["likeCount"] = serde_json::json!(like_count);
+            Ok(json)
+        }
+    }
     pub async fn post_delete(&self, ctx: &Context<'_>, uuid: String) -> Result<bool> {
         let state = ctx.data::<Arc<crate::AppState>>()?;
         let claims = ctx
-            .data::<crate::serve::jwt::Claims>()
-            .map_err(|_err| crate::Error::RespMessage(422, String::from("无权限")))?;
+            .data::<Option<crate::serve::jwt::Claims>>()?
+            .as_ref()
+            .ok_or_else(|| crate::Error::Message("should login".into()))
+            .map_err(|e| e.extend_with(|_, e| e.set("code", 401)))?;
 
         let post = Post::find()
             .filter(
@@ -212,6 +270,8 @@ pub struct GraPostListQuery {
 #[derive(SimpleObject, FromQueryResult)]
 #[graphql(complex)]
 pub struct GraPost {
+    #[graphql(skip)]
+    id: i32,
     uuid: String,
     title: String,
     #[graphql(skip)]
@@ -280,6 +340,27 @@ impl GraPost {
             .await?
             .ok_or_else(|| crate::Error::Message("category not exists".into()))?;
         Ok(json)
+    }
+    async fn is_like(&self, ctx: &Context<'_>) -> Result<bool> {
+        let state = ctx.data::<Arc<crate::AppState>>()?;
+        let claims = ctx.data::<Option<crate::serve::jwt::Claims>>()?;
+        if let Some(claims) = claims {
+            let db_post = post::Entity::find_by_id(self.id)
+                .one(&state.db_conn)
+                .await?
+                .ok_or_else(|| Error::new_with_source(crate::Error::Message("post not exists".into())))?;
+            let db_like = Like::find()
+                .filter(
+                    Condition::all()
+                        .add(like::Column::UserId.eq(claims.sub.user_id))
+                        .add(like::Column::LikeAbleType.eq(like::LikeAbleType::Post))
+                        .add(like::Column::LikeAbleId.eq(db_post.id)),
+                )
+                .one(&state.db_conn)
+                .await?;
+            return Ok(db_like.is_some());
+        }
+        Ok(false)
     }
 }
 

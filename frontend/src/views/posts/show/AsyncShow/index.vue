@@ -31,6 +31,7 @@ export default defineComponent({
 							uuid,
 							title,
 							user,
+							isLike,
 							likeCount,
 							commentCount,
 							category,
@@ -53,8 +54,22 @@ export default defineComponent({
 			}
 		}
 
+		const onLikePost = async () => {
+			const { data: rData } = await graphqlApi({
+				query: `
+					mutation GPostLike($uuid: String!) {
+						postLike(uuid: $uuid)
+					}
+				`,
+				variables: {
+					uuid: route.params.uuid
+				}
+			})
+			Object.assign(post.value, rData.data.postLike)
+		}
+
 		await fetchPost()
-		return { dayjs, route, router, userInfo, userStore, post }
+		return { dayjs, route, router, userInfo, userStore, post, onLikePost }
 	},
 	mounted() {
 		this.userInfo = this.userStore.userInfo
@@ -114,7 +129,7 @@ export default defineComponent({
 					</div>
 					<div class="mb-4">
 						<t-card class="card">
-							<t-button variant="text" :theme="'default'" ghost>
+							<t-button variant="text" :theme="post.isLike ? 'primary' : 'default'" ghost @click="onLikePost">
 								<span class="flex items-center">
 									<t-icon name="thumb-up" style="font-size: 32px;" />
 									<span>{{ post.likeCount }}</span>

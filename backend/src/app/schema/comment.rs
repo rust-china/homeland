@@ -1,5 +1,5 @@
 use async_graphql::*;
-use entity::{comment, post, prelude::*, user};
+use entity::{comment, like, post, prelude::*, user};
 use std::sync::Arc;
 
 #[derive(Default, Debug)]
@@ -20,7 +20,10 @@ impl CommentQuery {
         } else {
             condition = condition.add(comment::Column::Ancestry.is_null());
         }
-        let comment_paginator = Comment::find().filter(condition).order_by_asc(comment::Column::Id).paginate(&state.db_conn, query.page_size);
+        let comment_paginator = Comment::find()
+            .filter(condition)
+            .order_by_asc(comment::Column::Id)
+            .paginate(&state.db_conn, query.page_size);
         let mut pagination: super::GraPagination = comment_paginator.num_items_and_pages().await?.into();
         pagination.page_no = Some(query.page_no);
         pagination.page_size = Some(query.page_size);
@@ -153,6 +156,59 @@ impl CommentMutation {
     //     let _comment: comment::Model = comment.update(&state.db_conn).await?;
     //     Ok(true)
     // }
+    pub async fn comment_like(&self, ctx: &Context<'_>, id: i32) -> Result<serde_json::Value> {
+        let state = ctx.data::<Arc<crate::AppState>>()?;
+        let claims = ctx
+            .data::<Option<crate::serve::jwt::Claims>>()?
+            .as_ref()
+            .ok_or_else(|| crate::Error::Message("请登录".into()))
+            .map_err(|e| e.extend_with(|_, e| e.set("code", 401)))?;
+
+        let db_comment = Comment::find()
+            .filter(Condition::all().add(comment::Column::Id.eq(id)).add(comment::Column::UserId.eq(claims.sub.user_id)))
+            .one(&state.db_conn)
+            .await?
+            .ok_or_else(|| crate::Error::Message("no comment".into()))?;
+
+        let db_like = Like::find()
+            .filter(
+                Condition::all()
+                    .add(like::Column::UserId.eq(claims.sub.user_id))
+                    .add(like::Column::LikeAbleType.eq(like::LikeAbleType::Comment))
+                    .add(like::Column::LikeAbleId.eq(db_comment.id)),
+            )
+            .one(&state.db_conn)
+            .await?;
+        if let Some(db_like) = db_like {
+            db_like.delete(&state.db_conn).await?;
+            let like_count = db_comment.like_count - 1;
+            let mut comment: comment::ActiveModel = db_comment.into();
+            comment.like_count = Set(like_count);
+            comment.save(&state.db_conn).await?;
+
+            let mut json: serde_json::Value = serde_json::from_str(r#"{}"#).unwrap();
+            json["isLike"] = serde_json::json!(false);
+            json["likeCount"] = serde_json::json!(like_count);
+            Ok(json)
+        } else {
+            let like = like::ActiveModel {
+                user_id: Set(claims.sub.user_id),
+                like_able_type: Set(like::LikeAbleType::Comment),
+                like_able_id: Set(db_comment.id),
+                ..Default::default()
+            };
+            like.save(&state.db_conn).await?;
+            let like_count = db_comment.like_count + 1;
+            let mut comment: comment::ActiveModel = db_comment.into();
+            comment.like_count = Set(like_count);
+            comment.save(&state.db_conn).await?;
+
+            let mut json: serde_json::Value = serde_json::from_str(r#"{}"#).unwrap();
+            json["isLike"] = serde_json::json!(true);
+            json["likeCount"] = serde_json::json!(like_count);
+            Ok(json)
+        }
+    }
     pub async fn comment_delete(&self, ctx: &Context<'_>, id: i32) -> Result<bool> {
         let state = ctx.data::<Arc<crate::AppState>>()?;
         let claims = ctx
@@ -251,6 +307,27 @@ impl GraComment {
             .await?
             .ok_or_else(|| crate::Error::Message("user not exists".into()))?;
         Ok(db_user)
+    }
+    async fn is_like(&self, ctx: &Context<'_>) -> Result<bool> {
+        let state = ctx.data::<Arc<crate::AppState>>()?;
+        let claims = ctx.data::<Option<crate::serve::jwt::Claims>>()?;
+        if let Some(claims) = claims {
+            let db_comment = comment::Entity::find_by_id(self.id)
+                .one(&state.db_conn)
+                .await?
+                .ok_or_else(|| Error::new_with_source(crate::Error::Message("comment not exists".into())))?;
+            let db_like = Like::find()
+                .filter(
+                    Condition::all()
+                        .add(like::Column::UserId.eq(claims.sub.user_id))
+                        .add(like::Column::LikeAbleType.eq(like::LikeAbleType::Comment))
+                        .add(like::Column::LikeAbleId.eq(db_comment.id)),
+                )
+                .one(&state.db_conn)
+                .await?;
+            return Ok(db_like.is_some());
+        }
+        Ok(false)
     }
 }
 

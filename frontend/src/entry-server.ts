@@ -21,7 +21,8 @@ export const render = async (ctx: Record<string, any>, manifest: Record<string, 
 	// 注入vue ssr中的上下文对象，获取方法useSSRContext()
 	const renderContext = {
 		ssrPath: ctx.path,
-		ssrData: ctx.ssrData
+		ssrData: ctx.ssrData,
+		ssrCookie: ctx.get('cookie')
 	} as Record<string, any>
 	const renderedHtml = await renderToString(app, renderContext)
 	const preloadLinks = renderPreloadLinks(renderContext.modules, manifest)

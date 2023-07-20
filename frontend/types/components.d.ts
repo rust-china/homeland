@@ -28,6 +28,7 @@ declare module 'vue' {
     TSpace: typeof import('tdesign-vue-next')['Space']
     TTabPanel: typeof import('tdesign-vue-next')['TabPanel']
     TTabs: typeof import('tdesign-vue-next')['Tabs']
+    TTag: typeof import('tdesign-vue-next')['Tag']
     TTextarea: typeof import('tdesign-vue-next')['Textarea']
   }
 }

@@ -22,14 +22,14 @@ const formState = useForm({
 
 const menuOptions = ref([
 	{ content: '社区', value: 'posts' },
-	{ content: '招聘', value: 'jobs' },
-	{ content: 'Wiki', value: 'wiki' },
-	{ content: '酷站', value: 'sites' },
+	// { content: '招聘', value: 'jobs' },
+	// { content: 'Wiki', value: 'wiki' },
+	// { content: '酷站', value: 'sites' },
 ])
 const userOptions = ref([
-	{ content: '操作一', value: 1 },
-	{ content: '操作二', value: 2 },
-	{ content: '操作三', value: 3, divider: true },
+	// { content: '操作一', value: 1 },
+	// { content: '操作二', value: 2 },
+	// { content: '操作三', value: 3, divider: true },
 	{ content: '退出', value: 'logout', onClick: async () => {
 			await logoutApi()
 			userStore.setUserInfo(null)

@@ -1,4 +1,5 @@
 <script lang="tsx" setup>
+import { useSSRContext } from 'vue'
 import { useList } from '@/utils/hooks/useList'
 import { useUserStore } from '@/stores/user'
 import { graphqlApi } from '@/api'
@@ -8,6 +9,7 @@ import { useDialog } from '@/utils/hooks/useDialog'
 import { MessagePlugin } from 'tdesign-vue-next';
 import Comment from './components/Comment.vue'
 
+const ssrContext = useSSRContext()
 const dialog = useDialog()
 const route = useRoute()
 const userStore = useUserStore()
@@ -45,6 +47,10 @@ const listState = useList({
 					postUuid: route.params.uuid,
 					...query
 				})
+			}
+		}, {
+			headers: {
+				Cookie: ssrContext?.ssrCookie
 			}
 		})
 		listState.records = rData.data.commentList.records

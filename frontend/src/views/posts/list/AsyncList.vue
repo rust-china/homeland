@@ -1,10 +1,12 @@
 <script lang="tsx">
+import { useSSRContext } from 'vue'
 import { useList } from '@/utils/hooks/useList'
 import { graphqlApi } from '@/api'
 import dayjs from 'dayjs'
 
 export default defineComponent({
 	async setup(_ctx) {
+		const ssrContext = useSSRContext()
 		const route = useRoute()
 		const router = useRouter()
 		const sortMap: any = {
@@ -25,6 +27,7 @@ export default defineComponent({
 									title,
 									user,
 									category,
+									commentCount,
 									updatedAt,
 									createdAt,
 								},
@@ -42,6 +45,10 @@ export default defineComponent({
 							pageSize: listState.pagination.pageSize,
 							sort: sortMap[route.name as any] || sortMap['posts/default']
 						}
+					}
+				}, {
+					headers: {
+						Cookie: ssrContext?.ssrCookie
 					}
 				})
 				listState.records = rData.data.postList.records
@@ -100,6 +107,9 @@ export default defineComponent({
 											</t-space>
 										</template>
 									</t-list-item-meta>
+									<template #action>
+										<t-tag>{{ post.commentCount }}</t-tag>
+									</template>
 								</t-list-item>
 							</template>
 						</t-list>

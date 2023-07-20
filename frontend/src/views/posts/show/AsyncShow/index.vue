@@ -1,4 +1,5 @@
 <script lang="tsx">
+import { useSSRContext } from 'vue'
 import { graphqlApi } from '@/api'
 import { useUserStore } from '@/stores/user'
 import DOMPurify from 'isomorphic-dompurify';
@@ -18,6 +19,7 @@ export default defineComponent({
 		IdentAvatar,
 	},
 	async setup(_ctx) {
+		const ssrContext = useSSRContext()
 		const userStore = useUserStore()
 		const route = useRoute();
 		const router = useRouter();
@@ -46,6 +48,10 @@ export default defineComponent({
 				variables: {
 					uuid: route.params.uuid
 				}
+			}, {
+				headers: {
+					Cookie: ssrContext?.ssrCookie
+				}
 			})
 
 			const postData = rData.data.post
@@ -65,6 +71,10 @@ export default defineComponent({
 				`,
 				variables: {
 					uuid: route.params.uuid
+				}
+			}, {
+				headers: {
+					Cookie: ssrContext?.ssrCookie
 				}
 			})
 			Object.assign(post.value, rData.data.postLike)

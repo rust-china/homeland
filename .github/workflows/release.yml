@@ -1,30 +1,30 @@
-name: deploy
+name: release
 
 on:
   push:
     paths-ignore:
-      - '**/README.md'
+      - "**/README.md"
     tags:
-      - "[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+"
     # branches:
     #   - "main"
 
 env:
   CARGO_TERM_COLOR: always
-  RUST_BINARY_NAME: backend
+  # RUST_BINARY_NAME: backend
 
 permissions:
   contents: write
 
 jobs:
-  build-backend:
-    name: build-backend
-    runs-on: ${{ matrix.os }}
-    defaults:
-      run:
-        shell: bash
-        working-directory: backend
+  build-homeland:
+    name: build-homeland
+    # defaults:
+    #   run:
+    #     shell: bash
+    #     # working-directory: backend
     strategy:
+      fail-fast: false
       matrix:
         # You can add more, for any target you'd like!
         include:
@@ -32,14 +32,16 @@ jobs:
             os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             toolchain: stable
-          # - build: macos
-          #   os: macos-latest
-          #   target: x86_64-apple-darwin
-          #   toolchain: stable
+          - build: macos
+            os: macos-latest
+            target: x86_64-apple-darwin
+            toolchain: stable
           - build: windows
             os: windows-latest
             target: x86_64-pc-windows-gnu
             toolchain: stable
+    
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -60,6 +62,19 @@ jobs:
           echo "short version hash => ${{ steps.short-sha.outputs.sha }}"
           echo "get-latest-tag ${{ steps.get-latest-tag.outputs.tag }}"
 
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: 8
+          run_install: false
+
+      - name: setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: pnpm
+
       - name: Install Rust
         # Or @nightly if you want
         uses: dtolnay/rust-toolchain@v1
@@ -68,27 +83,40 @@ jobs:
           # Make Rust compile to our target (defined in the matrix)
           targets: ${{ matrix.target }}
           toolchain: ${{ matrix.toolchain }}
+      
+      - uses: Swatinem/rust-cache@v2
+
+      - name: install frontend dependencies
+        run: pnpm install
 
       - name: Build # bugs with working-directory see: https://github.com/actions-rs/cargo/issues/86
         run: |
-          cargo build --verbose --release --target ${{ matrix.target }}
+          cd backend && cargo build --verbose --release --target ${{ matrix.target }}
+          cd ../frontend && npm run build
+          cd ../
 
       - name: Build archive
         shell: bash
         run: |
           # Replace with the name of your binary
-          binary_name=${{ env.RUST_BINARY_NAME }}
+          # binary_name=${{ env.RUST_BINARY_NAME }}
 
-          dirname="$binary_name-${{ steps.get-latest-tag.outputs.tag }}-${{ env.SHA }}-${{ matrix.target }}"
+          dirname="homeland-${{ steps.get-latest-tag.outputs.tag }}-${{ env.SHA }}-${{ matrix.target }}"
           mkdir "$dirname"
+          mkdir "$dirname/backend"
+          mkdir "$dirname/frontend"
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            mv "target/${{ matrix.target }}/release/$binary_name.exe" "$dirname"
+            mv "backend/target/${{ matrix.target }}/release/backend.exe" "$dirname/backend"
           else
-            mv "target/${{ matrix.target }}/release/$binary_name" "$dirname"
+            mv "backend/target/${{ matrix.target }}/release/backend" "$dirname/backend"
           fi
 
           # add more resource to archive
-          mv .env "$dirname"
+          mv backend/.env "$dirname/backend"
+          mv frontend/serve "$dirname/frontend"
+          mv frontend/dist "$dirname/frontend"
+          mv frontend/package.json "$dirname/frontend"
+          mv frontend/ecosystem.config.js "$dirname/frontend"
 
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
             7z a "$dirname.zip" "$dirname"
@@ -104,30 +132,30 @@ jobs:
       - name: upload-artifact
         uses: actions/upload-artifact@v3
         with:
-          name: backend-artifact
+          name: homeland-artifact
           retention-days: 5
           if-no-files-found: error
-          path: backend/${{ env.ASSET }}
+          path: ${{ env.ASSET }}
 
   archive:
     name: archive
     needs:
-      - build-backend
+      - build-homeland
     runs-on: ubuntu-latest
     steps:
-      -
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v3
 
       - name: download artifact backend
         uses: actions/download-artifact@v3
         with:
-          name: backend-artifact
-          path: ${{ github.workspace }}/backend/dist/
+          name: homeland-artifact
+          path: |
+            ${{ github.workspace }}/
 
       - name: Display structure of downloaded files
         run: |
-          ls -R ${{ github.workspace }}/backend/dist/
+          ls -R ${{ github.workspace }}/
 
       - uses: softprops/action-gh-release@master
         name: Create Release
@@ -135,9 +163,9 @@ jobs:
         with:
           ## with permissions to create releases in the other repo
           token: "${{ secrets.GITHUB_TOKEN }}"
-          #  body_path: ${{ github.workspace }}-CHANGELOG.txt
+          # body_path: ${{ github.workspace }}-CHANGELOG.txt
           prerelease: true
           # https://github.com/isaacs/node-glob
           files: |
-            backend/dist/*.zip
-            backend/dist/*.tar.gz
+            *.zip
+            *.tar.gz

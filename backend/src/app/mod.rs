@@ -17,6 +17,7 @@ impl AppState {
         Ok(Arc::new(Self {
             db_conn: {
                 let database_url = std::env::var("DATABASE_URL")?;
+                log::info!("database_url: {}", database_url);
                 let mut opt = ConnectOptions::new(database_url);
                 opt.sqlx_logging(false) // Disabling SQLx log
                     .sqlx_logging_level(log::LevelFilter::Info); // Setting SQLx log level

@@ -8,7 +8,7 @@ use error::Error;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    dotenvy::from_filename_override(".env")?;
+    dotenvy::from_filename(".env")?;
     let _ = dotenvy::from_filename_override(".env.local");
     logger::logging()?;
     
@@ -16,6 +16,6 @@ async fn main() -> anyhow::Result<()> {
         AppState::init().await
     }).await;
 
-    let addr = format!("127.0.0.1:{}", std::env::var("SERVE_PORT")?).parse()?;
+    let addr = format!("0.0.0.0:{}", std::env::var("SERVE_PORT")?).parse()?;
     serve::listen(addr).await
 }

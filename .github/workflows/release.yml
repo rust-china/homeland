@@ -116,7 +116,7 @@ jobs:
           mv frontend/serve "$dirname/frontend"
           mv frontend/dist "$dirname/frontend"
           mv frontend/package.json "$dirname/frontend"
-          mv frontend/ecosystem.config.js "$dirname/frontend"
+          mv ecosystem.config.cjs "$dirname"
 
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
             7z a "$dirname.zip" "$dirname"

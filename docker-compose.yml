@@ -1,0 +1,41 @@
+version: '3'
+
+services:
+  rustapp:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    # image: wuyuedefeng/homeland:latest
+    environment:
+      DATABASE_URL: postgres://postgres:123456@db:5432/homeland
+      REDIS_URL: redis://redis:6379/
+    ports:
+      - 3000:3000
+      - 3001:9000
+    depends_on:
+      - db
+      # - redis
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 123456
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - /mnt/homeland/postgresql/data:/var/lib/postgresql/data
+    ports:
+      - 54321:5432
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+  # redis:
+  #   image: redis:latest
+  #   restart: always
+  #   volumes:
+  #     - /mnt/homeland/redis/data:/data
+  #   ports:
+  #     - 63791:6379

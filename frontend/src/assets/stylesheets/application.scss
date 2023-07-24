@@ -44,9 +44,12 @@ body {
 
 #app {
   @apply h-full;
+}
 
+#app, .use-dialog {
   .html-render {
     background-color: transparent;
+    font-size: 15px;
     // padding: 15px;
 
     ul {

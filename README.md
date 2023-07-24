@@ -2,7 +2,7 @@
 <div align="center">
   <img src="https://www.rust-lang.org/static/images/rust-logo-blk.svg" width="400">
   <p align="center">Open source discussion website.</p>
-  <p align="center">开源的论坛／社区网站系统，基于 <a href="https://rust-china.cn">Rust China</a> 发展而来。</p>
+  <p align="center">开源的论坛／社区网站系统，基于 <a href="https://rust.beer">Rust China</a> 发展而来。</p>
 </div>
 
 [![ci-backend](https://github.com/rust-china/homeland/actions/workflows/ci-backend.yml/badge.svg)](https://github.com/rust-china/homeland/actions/workflows/ci-backend.yml)

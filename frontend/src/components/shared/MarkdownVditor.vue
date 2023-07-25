@@ -28,7 +28,7 @@ onMounted(() => {
 		width: '100%',
 		height: '100%',
 		mode: 'ir',
-		theme: isDarkTheme.value ? 'dark' : 'classic',
+		theme: isDarkTheme?.value ? 'dark' : 'classic',
 		tab: '\t',
 		placeholder: '请输入Markdown语法',
 		cache: {
@@ -148,10 +148,8 @@ onMounted(() => {
 					vditor?.setValue(props.modelValue)
 				}
 			})
-		}, 500)
+		}, 1500)
 	})
-
-
 })
 </script>
 

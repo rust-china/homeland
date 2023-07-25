@@ -2,11 +2,7 @@
 import { useSSRContext } from 'vue'
 import { graphqlApi } from '@/api'
 import { useUserStore } from '@/stores/user'
-import DOMPurify from 'isomorphic-dompurify';
-import 'github-markdown-css/github-markdown.css'
-// import '@/assets/stylesheets/syntect-highlight-code/syntect-highlight-code.scss'
-import hljs from 'highlight.js'
-import mermaid from 'mermaid'
+import MarkdownRender from '@/components/shared/MarkdownRender.vue'
 import dayjs from 'dayjs'
 import Comments from './Comments.vue'
 import NewComment from './components/NewComment.vue'
@@ -17,6 +13,7 @@ export default defineComponent({
 		Comments,
 		NewComment,
 		IdentAvatar,
+		MarkdownRender,
 	},
 	async setup(_ctx) {
 		const ssrContext = useSSRContext()
@@ -24,7 +21,6 @@ export default defineComponent({
 		const route = useRoute();
 		const router = useRouter();
 
-		const postBodyRef = ref<any>()
 		const userInfo = ref<any>(null)
 		const post = ref<any>(null)
 		const fetchPost = async () => {
@@ -57,8 +53,7 @@ export default defineComponent({
 			const postData = rData.data.post
 			post.value = {
 				...postData,
-				// eslint-disable-next-line no-misleading-character-class
-				bodyHtml: DOMPurify.sanitize(postData.bodyHtml.replace(/^[\u200B\u200C\u200D\u200E\u200F\uFEFF]/, ''))
+				bodyHtml: postData.bodyHtml
 			}
 		}
 
@@ -81,19 +76,10 @@ export default defineComponent({
 		}
 
 		await fetchPost()
-		return { dayjs, route, router, userInfo, userStore, post, postBodyRef, onLikePost }
+		return { dayjs, route, router, userInfo, userStore, post, onLikePost }
 	},
 	mounted() {
 		this.userInfo = this.userStore.userInfo
-		this.postBodyRef.querySelectorAll('pre code').forEach((el: HTMLElement) => {
-			if (!el.classList.contains('language-mermaid')) {
-				hljs.highlightElement(el)
-			}
-		})
-		mermaid.initialize({ startOnLoad: false })
-		mermaid.run({
-			nodes: this.postBodyRef.querySelectorAll('pre code.language-mermaid'),
-		});
 	}
 })
 </script>
@@ -105,15 +91,17 @@ export default defineComponent({
 				<div class="grow lg:w-3/4">
 					<t-card bordered class="card">
 						<template #title>
-							{{ post?.title }}
+							<span class="font-bold text-lg">{{ post?.title }}</span>
 						</template>
 						<template #description>
 							<t-space size="small">
 								<span class="opacity-50">{{ post.user.name || post.user.username }}</span>
-								<span>最后更新于：{{ dayjs(post.updatedAt).format('YYYY-MM-DD HH:mm:ss') }}</span>
+								<span>发表于：{{ dayjs(post.createdAt).format('YYYY-MM-DD HH:mm:ss') }}</span>
 							</t-space>
 						</template>
-						<div ref="postBodyRef" class="post-body-render html-render markdown-body" v-html="post?.bodyHtml"></div>
+						<div class="post-body-render">
+							<MarkdownRender :html="post?.bodyHtml"></MarkdownRender>
+						</div>
 					</t-card>
 					<t-card bordered class="card mt-5">
 						<Comments></Comments>
@@ -162,12 +150,3 @@ export default defineComponent({
 		</div>
 	</main>
 </template>
-
-
-<style lang="scss">
-@import 'highlight.js/scss/github.scss';
-
-html[theme-mode=dark] {
-	@import 'highlight.js/scss/github-dark.scss';
-}
-</style> 

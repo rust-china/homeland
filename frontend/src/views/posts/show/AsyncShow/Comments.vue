@@ -1,6 +1,6 @@
 <script lang="tsx" setup>
-import { useSSRContext } from 'vue'
 import { useList } from '@/utils/hooks/useList'
+import { useSSRContext } from '@/utils/hooks/useSSRContext'
 import { useUserStore } from '@/stores/user'
 import { graphqlApi } from '@/api'
 import { trimQuery } from '@/utils/libs'

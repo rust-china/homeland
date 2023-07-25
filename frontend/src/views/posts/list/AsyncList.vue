@@ -1,6 +1,6 @@
 <script lang="tsx">
-import { useSSRContext } from 'vue'
 import { useList } from '@/utils/hooks/useList'
+import { useSSRContext } from '@/utils/hooks/useSSRContext'
 import { graphqlApi } from '@/api'
 import dayjs from 'dayjs'
 

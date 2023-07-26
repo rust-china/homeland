@@ -27,7 +27,7 @@ onMounted(() => {
 		// icon: 'material',
 		width: '100%',
 		height: '100%',
-		mode: 'ir',
+		mode: 'sv',
 		theme: isDarkTheme?.value ? 'dark' : 'classic',
 		tab: '\t',
 		placeholder: '请输入Markdown语法',
@@ -117,7 +117,7 @@ onMounted(() => {
 			url: '/api/storage/upload',
 			multiple: false,
 			fieldName: 'file',
-			format: (files: File[], response: string) => {
+			format: (files: any[], response: string) => {
 				let json = JSON.parse(response)
 				json.data.succMap = { [json.data.filename]: json.data.path }
 				return JSON.stringify(json)

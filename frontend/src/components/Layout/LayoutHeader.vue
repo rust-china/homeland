@@ -8,7 +8,7 @@ const router = useRouter()
 const route = useRoute()
 const userStore = useUserStore()
 
-const userInfo = ref(null)
+const userInfo = ref<any>(null)
 const activeTab = computed(() => `${route.name as any}`.split('/')[0])
 
 const onTabChange = (tabValue: TabValue) => {
@@ -20,7 +20,7 @@ const formState = useForm({
 	async onSubmit() { }
 })
 
-const menuOptions = ref([
+const menuOptions = ref<any>([
 	{ content: '社区', value: 'posts' },
 	// { content: '招聘', value: 'jobs' },
 	// { content: 'Wiki', value: 'wiki' },
@@ -54,7 +54,7 @@ onMounted(() => {
 					<RouterLink :to="{ path: '/' }" class="title whitespace-nowrap">
 						<b>Rust</b> China
 					</RouterLink>
-					<t-dropdown class="block md:hidden" :options="menuOptions" trigger="click" @click="(option) => onTabChange(option.value as any)">
+					<t-dropdown class="block md:hidden" :options="menuOptions" trigger="click" @click="(option: any) => onTabChange(option.value as any)">
 						<t-icon name="view-list" size="16" />
 					</t-dropdown>
 					<div class="hidden md:block">

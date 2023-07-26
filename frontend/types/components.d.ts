@@ -26,8 +26,6 @@ declare module 'vue' {
     TListItemMeta: typeof import('tdesign-vue-next')['ListItemMeta']
     TPagination: typeof import('tdesign-vue-next')['Pagination']
     TSpace: typeof import('tdesign-vue-next')['Space']
-    TTabPanel: typeof import('tdesign-vue-next')['TabPanel']
-    TTabs: typeof import('tdesign-vue-next')['Tabs']
     TTag: typeof import('tdesign-vue-next')['Tag']
     TTextarea: typeof import('tdesign-vue-next')['Textarea']
   }

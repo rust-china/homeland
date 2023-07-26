@@ -81,8 +81,8 @@ importers:
         specifier: ^2.1.1
         version: 2.1.1
       tdesign-vue-next:
-        specifier: ^1.3.11
-        version: 1.3.11(vue@3.3.4)
+        specifier: ^1.4.1
+        version: 1.4.1(vue@3.3.4)
       vditor:
         specifier: ^3.9.4
         version: 3.9.4
@@ -92,6 +92,9 @@ importers:
       vue-router:
         specifier: ^4.2.2
         version: 4.2.2(vue@3.3.4)
+      web-file-polyfill:
+        specifier: ^1.0.4
+        version: 1.0.4
       winston:
         specifier: ^3.10.0
         version: 3.10.0
@@ -1389,8 +1392,8 @@ packages:
     resolution: {integrity: sha512-x/rqGMdzj+fWZvCOYForTghzbtqPDZ5gPwaoNGHdgDfF2QA/XZbCBp4Moo5scrkAMPhB7z26XM/AaHuIJdgauA==}
     dev: true
 
-  /@babel/runtime@7.22.5:
-    resolution: {integrity: sha512-ecjvYlnAaZ/KVneE/OdKYBYfgXV3Ptu6zQWmgEF7vwKhQnvVS6bjMD2XYgj+SNvQ1GfK/pjgokfPkC/2CO8CuA==}
+  /@babel/runtime@7.22.6:
+    resolution: {integrity: sha512-wDb5pWm4WDdF6LFUde3Jl8WzPA+3ZbxYqkC6xAXuD3irdEHN1k0NfTRrJD8ZD378SJ61miMLCqIOXYhd8x+AJQ==}
     engines: {node: '>=6.9.0'}
     dependencies:
       regenerator-runtime: 0.13.11
@@ -5599,7 +5602,7 @@ packages:
   /regenerator-transform@0.15.1:
     resolution: {integrity: sha512-knzmNAcuyxV+gQCufkYcvOqX/qIIfHLv0u5x79kRxuGojfYVky1f15TzZEu2Avte8QGepvUNTnLskf8E6X6Vyg==}
     dependencies:
-      '@babel/runtime': 7.22.5
+      '@babel/runtime': 7.22.6
     dev: true
 
   /regexp.prototype.flags@1.5.0:
@@ -6062,21 +6065,21 @@ packages:
       - ts-node
     dev: true
 
-  /tdesign-icons-vue-next@0.1.11(vue@3.3.4):
-    resolution: {integrity: sha512-/cLdTt1OIPcz/q/sTD3LsRbn/0x+nzhpxyVyRWe+HE3FYfhMV2pxXTV8ITYtmzUDyxN02vV0cQTCqz0frODC1w==}
+  /tdesign-icons-vue-next@0.1.12(vue@3.3.4):
+    resolution: {integrity: sha512-i+hkCeq+qjI+Gau9TeSmdrvzopQZtZWb/AxFaLyKH4mmnItiiU9lpjIg9wYcLYhFONeuGhHgG0n4YhVxgW8eHA==}
     peerDependencies:
       vue: ^3.0.0
     dependencies:
-      '@babel/runtime': 7.22.5
+      '@babel/runtime': 7.22.6
       vue: 3.3.4
     dev: false
 
-  /tdesign-vue-next@1.3.11(vue@3.3.4):
-    resolution: {integrity: sha512-e3JZwDa5lpMBWr79hF7lBczRAbkkE0KyEbhguStfYl/W4yeD+yWLchBzOB6i04vz89dGfay7UaQNf6T3spCK0A==}
+  /tdesign-vue-next@1.4.1(vue@3.3.4):
+    resolution: {integrity: sha512-veakEUoVUxTCnL8XQGqu9QP7GplyE6mCM8wpvTl/nTMbTDlBZue5qWgT0IR6wFd1uUkyHLYV5qITKvCLuWCt2g==}
     peerDependencies:
       vue: '>=3.1.0'
     dependencies:
-      '@babel/runtime': 7.22.5
+      '@babel/runtime': 7.22.6
       '@popperjs/core': 2.11.8
       '@types/lodash': 4.14.182
       '@types/sortablejs': 1.15.1
@@ -6086,7 +6089,7 @@ packages:
       lodash: 4.17.21
       mitt: 3.0.1
       sortablejs: 1.15.0
-      tdesign-icons-vue-next: 0.1.11(vue@3.3.4)
+      tdesign-icons-vue-next: 0.1.12(vue@3.3.4)
       tinycolor2: 1.6.0
       validator: 13.9.0
       vue: 3.3.4
@@ -6529,6 +6532,23 @@ packages:
     engines: {node: '>=14'}
     dependencies:
       xml-name-validator: 4.0.0
+    dev: false
+
+  /web-blob@2.1.3:
+    resolution: {integrity: sha512-7ARypAQxyyqT7ZCHydKavBGCzvvhicGuUMFqg6Xua6H0HIqGgEH1VsMVr1P1Nx+D/maqrUNyOzHkTjBQH/bZOQ==}
+    dependencies:
+      web-streams-polyfill: 2.1.1
+    dev: false
+
+  /web-file-polyfill@1.0.4:
+    resolution: {integrity: sha512-AnwI+/bksR0DCY2zobfqDSMi529yzWCxUIuMc8jbC5qJNWGOnBgiWY0+KD5soiw40+IsNXi0Zl5W/dm12438NA==}
+    dependencies:
+      web-blob: 2.1.3
+    dev: false
+
+  /web-streams-polyfill@2.1.1:
+    resolution: {integrity: sha512-dlNpL2aab3g8CKfGz6rl8FNmGaRWLLn2g/DtSc9IjB30mEdE6XxzPfPSig5BwGSzI+oLxHyETrQGKjrVVhbLCg==}
+    engines: {node: '>= 8'}
     dev: false
 
   /web-worker@1.2.0:

@@ -1,5 +1,8 @@
 const path = require('path')
+const  { File, Blob } = require('web-file-polyfill')
 require('dotenv').config({ path: path.resolve(process.cwd(), '.env.local') })
+global.File = File
+global.Blob = Blob
 
 const Koa = require('koa')
 // middlewares

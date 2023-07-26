@@ -51,7 +51,6 @@ export default defineConfig({
     rollupOptions: {
       output:{
         manualChunks: {
-          'vditor': ['vditor'],
         }
       }
     }

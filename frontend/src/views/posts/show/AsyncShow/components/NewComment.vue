@@ -52,7 +52,7 @@ const formState = useForm({
 	<t-form :ref="formState.setFormRef" :data="formState.model" :rules="formState.rules" label-align="top" :labelWidth="0"
 		@reset="formState.onReset" @submit="formState.onSubmit">
 		<t-form-item label="回复" name="body">
-			<MarkdownVditor v-model="formState.model.body" :options="{ minHeight: 400 }"></MarkdownVditor>
+			<MarkdownVditor v-model="formState.model.body" :options="{ minHeight: 400, mode: 'ir' }"></MarkdownVditor>
 		</t-form-item>
 		<t-form-item>
 			<t-space>

@@ -1,11 +1,12 @@
 <script lang="tsx" setup>
-import { watchEffect, nextTick } from 'vue'
+import { watchEffect } from 'vue'
 import { marked } from 'marked'
 // import { markedHighlight } from "marked-highlight";
 // import '@/assets/stylesheets/syntect-highlight-code/syntect-highlight-code.scss'
 import DOMPurify from 'isomorphic-dompurify';
 import mermaid from 'mermaid'
 import hljs from 'highlight.js'
+// import { getMathjaxSvg } from '@/utils/libs/mathjax'
 import 'github-markdown-css/github-markdown.css'
 
 marked.use({

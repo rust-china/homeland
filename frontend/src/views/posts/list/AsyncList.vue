@@ -103,7 +103,7 @@ export default defineComponent({
 										<template #description>
 											<t-space size="small">
 												<span class="opacity-30">{{ post.user.name || post.user.username }}</span>
-												<span class="opacity-70">最后更新于：{{ dayjs(post.updatedAt).format('YYYY-MM-DD HH:mm:ss') }}</span>
+												<span class="opacity-70">发表于：{{ dayjs(post.createdAt).format('YYYY-MM-DD HH:mm:ss') }}</span>
 											</t-space>
 										</template>
 									</t-list-item-meta>

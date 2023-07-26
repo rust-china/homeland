@@ -51,7 +51,7 @@ export default defineConfig({
     rollupOptions: {
       output:{
         manualChunks: {
-          // 'lodash-es': ['lodash-es'],
+          'vditor': ['vditor'],
         }
       }
     }

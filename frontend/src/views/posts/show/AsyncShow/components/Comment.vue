@@ -177,7 +177,7 @@ export default Comment
 			<template #author>
 				<div>{{ comment.user.name || comment.user.username }}</div>
 			</template>
-			<template #datetime>{{ dayjs(comment.updatedAt).format('YYYY-MM-DD HH:mm:ss') }}</template>
+			<template #datetime>{{ dayjs(comment.createdAt).format('YYYY-MM-DD HH:mm:ss') }}</template>
 			<template #content>
 				<div class="comment-body-rende w-full p-1">
 					<MarkdownRender :html="comment?.bodyHtml"></MarkdownRender>

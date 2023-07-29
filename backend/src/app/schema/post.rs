@@ -175,7 +175,7 @@ impl PostMutation {
             .await?;
         if let Some(db_like) = db_like {
             db_like.delete(&state.db_conn).await?;
-            let like_count = db_post.like_count - 1;
+            let like_count = std::cmp::max(db_post.like_count - 1, 0);
             let mut post: post::ActiveModel = db_post.into();
             post.like_count = Set(like_count);
             post.save(&state.db_conn).await?;
@@ -192,7 +192,7 @@ impl PostMutation {
                 ..Default::default()
             };
             like.save(&state.db_conn).await?;
-            let like_count = db_post.like_count + 1;
+            let like_count = std::cmp::max(db_post.like_count + 1, 0);
             let mut post: post::ActiveModel = db_post.into();
             post.like_count = Set(like_count);
             post.save(&state.db_conn).await?;

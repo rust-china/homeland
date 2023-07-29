@@ -184,24 +184,26 @@ export default Comment
 				</div>
 			</template>
 			<template #actions>
-				<t-space key="thumbUp" :size="6" @click="onLikeComment(comment)">
-					<t-icon name="thumb-up" />
-					<span>{{ comment.likeCount }}</span>
-				</t-space>
-				<t-space key="chat" :size="6" @click="onReply(comment)">
-					<t-icon name="chat" />
-					<span>回复</span>
-				</t-space>
-				<template v-if="comment.user.id === loginInfo?.id">
-					<t-space key="delete" :size="6" @click="$emit('destroy', comment)">
-						<t-icon name="delete" />
-						<span>删除</span>
-					</t-space>
-				</template>
+				<div class="flex gap-3">
+					<span class="action-item flex items-center" @click="onLikeComment(comment)">
+						<t-icon name="thumb-up" />
+						<span>{{ comment.likeCount }}</span>
+					</span>
+					<span class="action-item flex items-center" @click="onReply(comment)">
+						<t-icon name="chat" />
+						<span>回复</span>
+					</span>
+					<template v-if="comment.user.id === loginInfo?.id">
+						<span class="action-item flex items-center" @click="$emit('destroy', comment)">
+							<t-icon name="delete" />
+							<span>删除</span>
+						</span>
+					</template>
+				</div>
 			</template>
 			<template #reply>
 				<template v-if="comment.commentCount">
-					<div class="reply-container pl-5">
+					<div class="reply-container">
 						<div class="reply list">
 							<template v-for="(subComment, idx) in listState.records" :key="subComment.id">
 								<div class="reply-item">
@@ -231,6 +233,19 @@ export default Comment
 
 		&:empty {
 			display: none;
+		}
+	}
+
+	.action-item {
+		&:hover {
+			color: #000;;
+		}
+
+		@include when-inside('html[theme-mode=dark]') {
+			&:hover {
+				color: #fff;
+			}
+
 		}
 	}
 }

@@ -57,7 +57,9 @@ export default defineComponent({
 			}
 		}
 
+		const onLikePostRequesting = ref(false)
 		const onLikePost = async () => {
+			onLikePostRequesting.value = true
 			const { data: rData } = await graphqlApi({
 				query: `
 					mutation GPostLike($uuid: String!) {
@@ -71,12 +73,14 @@ export default defineComponent({
 				headers: {
 					Cookie: ssrContext?.ssrCookie
 				}
+			}).finally(() => {
+				onLikePostRequesting.value = false
 			})
 			Object.assign(post.value, rData.data.postLike)
 		}
 
 		await fetchPost()
-		return { dayjs, route, router, userInfo, userStore, post, onLikePost }
+		return { dayjs, route, router, userInfo, userStore, post, onLikePost, onLikePostRequesting }
 	},
 	mounted() {
 		this.userInfo = this.userStore.userInfo
@@ -90,15 +94,16 @@ export default defineComponent({
 			<div class="flex flex-col gap-4 lg:flex-row">
 				<div class="grow lg:w-3/4">
 					<t-card bordered class="card">
-						<template #title>
-							<span class="font-bold text-lg">{{ post?.title }}</span>
-						</template>
-						<template #description>
+						<div class="title font-bold text-lg">
+							<span>{{ post?.title }}</span>
+						</div>
+						<div class="description mb-5">
 							<t-space size="small">
 								<span class="opacity-50">{{ post.user.name || post.user.username }}</span>
-								<span>发表于：{{ dayjs(post.createdAt).format('YYYY-MM-DD HH:mm:ss') }}</span>
+								<span class="opacity-70">发表于：{{ dayjs(post.createdAt).format('YYYY-MM-DD HH:mm:ss') }}</span>
 							</t-space>
-						</template>
+						</div>
+						<t-divider></t-divider>
 						<div class="post-body-render">
 							<MarkdownRender :html="post?.bodyHtml"></MarkdownRender>
 						</div>
@@ -121,26 +126,23 @@ export default defineComponent({
 					</template>
 					<div class="mb-4">
 						<t-card class="card">
-							<t-list :split="false">
-								<t-list-item>
-									<t-list-item-meta :title="post?.user.username">
-										<template #image>
-											<IdentAvatar :ident="post?.user.username"></IdentAvatar>
-										</template>
-										<template #description>
-											<p class="text-sm">{{ dayjs(post.user.createdAt).format('YYYY-MM-DD HH:mm:ss') }}</p>
-										</template>
-									</t-list-item-meta>
-								</t-list-item>
-							</t-list>
+							<div class="auther-info flex gap-3">
+								<div class="left-panel">
+									<IdentAvatar class="h-[50px] rounded" :ident="post?.user.username"></IdentAvatar>
+								</div>
+								<div class="right-panel">
+									<div class="auther-name text-base font-bold">{{ post?.user.username }}</div>
+									<div class="text-xs my-1">{{ dayjs(post?.user.created_at).format('YYYY-MM-DD HH:mm:ss') }}</div>
+								</div>
+							</div>
 						</t-card>
 					</div>
 					<div class="mb-4">
 						<t-card class="card">
-							<t-button variant="text" :theme="post.isLike ? 'primary' : 'default'" ghost @click="onLikePost">
+							<t-button variant="text" :theme="post.isLike ? 'primary' : 'default'" @click="onLikePost" :disabled="onLikePostRequesting">
 								<span class="flex items-center">
-									<t-icon name="thumb-up" style="font-size: 32px;" />
-									<span>{{ post.likeCount }}</span>
+									<t-icon name="thumb-up" style="font-size: 28px;" />
+									<span class="font-bold">{{ post.likeCount }}</span>
 								</span>
 							</t-button>
 						</t-card>

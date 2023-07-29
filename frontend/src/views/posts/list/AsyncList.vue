@@ -88,31 +88,32 @@ export default defineComponent({
 			<div class="flex flex-col gap-4 lg:flex-row">
 				<div class="grow lg:w-3/4">
 					<t-card bordered class="card">
-						<t-list :split="true">
+						<div class="list">
 							<template v-for="post in listState.records" :key="post.uuid">
-								<t-list-item>
-									<t-list-item-meta>
-										<template #title>
+								<div class="item flex">
+									<div class="left-panel flex-1">
+										<div class="title text-base font-bold">
 											<RouterLink :to="{ name: 'posts/show', params: { uuid: post.uuid } }">
-												<t-space size="small">
+												<t-space size="small" class="hover:underline">
 													<span class="opacity-50">{{ post.category.name }}</span>
 													{{ post.title }}
 												</t-space>
 											</RouterLink>
-										</template>
-										<template #description>
+										</div>
+										<div class="desc mt-1">
 											<t-space size="small">
 												<span class="opacity-30">{{ post.user.name || post.user.username }}</span>
 												<span class="opacity-70">发表于：{{ dayjs(post.createdAt).format('YYYY-MM-DD HH:mm:ss') }}</span>
 											</t-space>
-										</template>
-									</t-list-item-meta>
-									<template #action>
+										</div>
+									</div>
+									<div class="right-panel flex items-center">
 										<t-tag>{{ post.commentCount }}</t-tag>
-									</template>
-								</t-list-item>
+									</div>
+								</div>
+								<t-divider></t-divider>
 							</template>
-						</t-list>
+						</div>
 						<t-pagination class="mt-3" show-jumper v-bind="listState.pagination" />
 					</t-card>
 				</div>
@@ -123,7 +124,7 @@ export default defineComponent({
 						</t-card>
 					</div>
 					<div class="mb-4">
-						<t-card title="小贴士" header-bordered class="card">
+						<t-card title="小贴士" header-bordered class="card opacity-75">
 							<p>管理员会定期检查帖子，发现有描述不清晰，或者不知道说什么的帖子移动到「NoPoint」节点，此节点永远不会上首页，如果你发现你的帖子进入了「NoPoint」里面，请检查调整你的标题和内容。</p>
 						</t-card>
 					</div>

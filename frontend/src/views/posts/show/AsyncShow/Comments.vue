@@ -105,17 +105,15 @@ await listState.onLoad()
 <template>
 	<main class="comments">
 		<template v-if="listState.records.length">
-			<t-list :split="true">
-				<!-- <template #header> 通过 Slot 插入的 Header </template> -->
+			<div class="list">
 				<template v-for="comment in listState.records" :key="comment.id">
-					<t-list-item>
+					<div class="item">
 						<Comment :comment="comment" :loginInfo="userInfo" @destroy="onDestroy"></Comment>
-					</t-list-item>
+					</div>
+					<t-divider></t-divider>
 				</template>
-				<template #footer>
-					<t-pagination class="mt-3" size="small" show-jumper v-bind="listState.pagination" />
-				</template>
-			</t-list>
+				<t-pagination class="mt-3" size="small" show-jumper v-bind="listState.pagination" />
+			</div>
 		</template>
 		<template v-else>暂无评论</template>
 	</main>

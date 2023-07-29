@@ -102,7 +102,7 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .layout-header {
-	@apply h-5;
+	// @apply h-5;
 }
 .layout-header-fixed {
 	@apply bg-white shadow-sm border-none text-gray-800 fixed left-0 right-0 top-0 h-[48px];

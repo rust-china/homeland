@@ -93,21 +93,9 @@ Markdown是一种轻量级的「标记语言」。
 
 
 
-
-
-
-
-
-
-
 支持 jpg、png、gif、svg 等图片格式，**其中 svg 文件仅可在微信公众平台中使用**，svg 文件示例如下：
 
 ![](https://markdown.com.cn/images/i-am-svg.svg)
-
-
-
-
-
 
 
 
@@ -170,9 +158,7 @@ public class HelloWorld {
   }
 }
 ```
-
 支持以下语言种类：
-
 ```
 bash
 clojure，cpp，cs，css
@@ -213,31 +199,7 @@ diff 不能同时和其他语言的高亮同时显示，且需要调整代码主
 
 ### 3.3 数学公式
 
-<!-- > 支持平台：微信公众号、知乎。
-
-行内公式使用方法，比如这个化学公式：$\ce{Hg^2+ ->[I-] HgI2 ->[I-] [Hg^{II}I4]^2-}$
-
-块公式使用方法如下：
-
-$$H(D_2) = -\left(\frac{2}{4}\log_2 \frac{2}{4} + \frac{2}{4}\log_2 \frac{2}{4}\right) = 1$$
-
-矩阵：
-
-$$
-  \begin{pmatrix}
-  1 & a_1 & a_1^2 & \cdots & a_1^n \\
-  1 & a_2 & a_2^2 & \cdots & a_2^n \\
-  \vdots & \vdots & \vdots & \ddots & \vdots \\
-  1 & a_m & a_m^2 & \cdots & a_m^n \\
-  \end{pmatrix}
-$$
-
-公式由于微信不支持，目前的解决方案是转成 svg 放到微信中，无需调整，矢量不失真。
-
-目前测试如果公式量过大，在 Chrome 下会存在粘贴后无响应，但是在 Firefox 中始终能够成功。 -->
-
 ### 3.4 TOC
-
 > 支持平台：微信公众号、知乎。
 
 TOC 全称为 Table of Content，列出全部标题。
@@ -247,7 +209,6 @@ TOC 全称为 Table of Content，列出全部标题。
 由于微信只支持到二级列表，本工具仅支持二级标题和三级标题的显示。
 
 ### 3.5 注音符号
-
 > 支持平台：微信公众号。
 
 支持注音符号，用法如下：
@@ -255,16 +216,13 @@ TOC 全称为 Table of Content，列出全部标题。
 Markdown Nice 这么好用，简直是{喜大普奔|hē hē hē hē}呀！
 
 ## 4 其他语法
-
 ### 4.1 HTML
-
 支持原生 HTML 语法，请写内联样式，如下：
 
 <span style="display:block;text-align:right;color:orangered;">橙色居右</span>
 <span style="display:block;text-align:center;color:orangered;">橙色居中</span>
 
 ### 4.2 UML
-
 * mermaid
 ```mermaid
 graph TD 
@@ -273,9 +231,7 @@ graph TD
         B --> D[Server02]
 ```
 
-
 ## 5 致谢
-
 * 歌词经理 [wechat-fromat](https://github.com/lyricat/wechat-format "灵感来源")
 * 颜家大少 [MD2All](http://md.aclickall.com/ "MdA2All")
 

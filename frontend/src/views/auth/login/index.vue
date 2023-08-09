@@ -1,6 +1,6 @@
 <script lang="tsx" setup>
 import { onMounted } from 'vue'
-import apiAxios from '@/utils/apiAxios'
+// import apiAxios from '@/utils/apiAxios'
 import { useUserStore } from '@/stores/user'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -9,8 +9,9 @@ const route = useRoute()
 const userStore = useUserStore();
 
 async function fetchUser() {
-	const { data: rData } = await apiAxios.get('/auth/user')
-	userStore.setUserInfo(rData)
+	// const { data: rData } = await apiAxios.get('/auth/user')
+	// userStore.setUserInfo(rData)
+	await userStore.fetchUserInfo()
 	router.replace({ name: 'home' })
 }
 

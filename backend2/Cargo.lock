@@ -126,7 +126,6 @@ name = "backend2"
 version = "0.1.0"
 dependencies = [
  "arel",
- "sqlx",
 ]
 
 [[package]]

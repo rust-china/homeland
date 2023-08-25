@@ -4,5 +4,9 @@
 backend/target
 backend/.env.local
 
+backend2/target
+backend2/.env.local
+
+
 node_modules
 dist

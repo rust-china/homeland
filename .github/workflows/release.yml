@@ -130,7 +130,7 @@ jobs:
           echo "release archive at: ${{ env.ASSET }}"
 
       - name: upload-artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: homeland-artifact
           retention-days: 5

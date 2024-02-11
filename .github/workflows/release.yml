@@ -62,7 +62,7 @@ jobs:
           echo "short version hash => ${{ steps.short-sha.outputs.sha }}"
           echo "get-latest-tag ${{ steps.get-latest-tag.outputs.tag }}"
 
-      - uses: pnpm/action-setup@v2
+      - uses: pnpm/action-setup@v3
         name: Install pnpm
         id: pnpm-install
         with:
